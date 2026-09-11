@@ -119,6 +119,74 @@ body[data-depth="plain"] .scene .plain-only{opacity:1}
 .depth-nav a[aria-current="step"]{color:var(--ink)}
 .depth-nav a[aria-current="step"]::before{width:22px;background:var(--green);height:3px}
 .depth-nav a:hover{color:var(--ink)}
+.depth-nav li.more{margin-top:10px;padding-top:10px;border-top:1px solid var(--grid)}
+.depth-nav li.more a::before{background:var(--pink);width:14px}
+
+/* ---------- after-journey navigation ---------- */
+.after-nav{border-top:1px solid var(--ink);background:var(--paper)}
+.after-nav .wrap{display:flex;align-items:center;gap:6px 22px;flex-wrap:wrap;padding-top:14px;padding-bottom:14px}
+.after-nav .eyebrow{margin-right:8px}
+.after-nav a{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-decoration:none;padding:6px 0;border-bottom:2px solid transparent}
+.after-nav a:hover, .after-nav a:focus-visible{border-bottom-color:var(--green);outline:none}
+
+/* ---------- the bill ---------- */
+.bill{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--ink);background:var(--paper)}
+.bill > div{padding:18px 20px 20px}
+.bill > div + div{border-left:1px solid var(--grid)}
+.bill .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.bill .v{font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.bill .v small{font-size:14px;font-weight:400;color:var(--muted);letter-spacing:0;margin-left:4px}
+.bill .sub{font-size:13px;color:var(--ink-2);margin:10px 0 0;line-height:1.45}
+.bill .sub b{color:var(--ink);font-weight:600}
+.bill-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:16px}
+.bill-notes p{font-size:14px;color:var(--ink-2);margin:0}
+.waterfall{margin-top:36px}
+.waterfall .bar{display:flex;height:34px;border:1px solid var(--ink);background:var(--paper);overflow:hidden}
+.waterfall .seg{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink);white-space:nowrap;overflow:hidden;min-width:2px}
+.waterfall .seg + .seg{border-left:1px solid var(--ink)}
+.waterfall .seg.tiny{font-size:0}
+.waterfall .seg.wire{background:var(--ground)}
+.waterfall .seg.gate{background:#E4E9E5}
+.waterfall .seg.prefill{background:var(--green)}
+.waterfall .seg.first{background:var(--green-tint)}
+.waterfall .seg.decode{background:var(--pink)}
+.waterfall .seg.render{background:var(--pink-tint)}
+.waterfall .legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin:10px 0 0;padding:0;list-style:none}
+.waterfall .legend li{font-size:13px;color:var(--ink-2);display:flex;align-items:baseline;gap:8px}
+.waterfall .legend i{display:inline-block;width:10px;height:10px;border:1px solid var(--ink);transform:translateY(1px)}
+.waterfall .legend b{font-family:var(--mono);font-weight:500;font-size:11.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+.waterfall .total{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:0 0 8px;display:flex;justify-content:space-between}
+
+/* ---------- scale ladder ---------- */
+.ladder{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--ink);background:var(--paper)}
+.rung{padding:18px 16px 20px;position:relative}
+.rung + .rung{border-left:1px solid var(--grid)}
+.rung .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.rung .v{font-size:22px;font-weight:500;letter-spacing:-.02em;line-height:1.1;margin-bottom:10px;text-wrap:balance}
+.rung ul{margin:0;padding:0;list-style:none;display:grid;gap:5px}
+.rung li{font-size:13px;color:var(--ink-2);line-height:1.4}
+.rung li b{font-family:var(--mono);font-weight:500;font-size:11.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+.rung:first-child{background:var(--green-tint)}
+.rung:last-child{background:var(--pink-tint)}
+.ladder-link{margin-top:16px;font-size:14.5px;color:var(--ink-2)}
+.ladder-link a{color:var(--ink);text-decoration-color:var(--green)}
+table.makers td:first-child{white-space:normal;min-width:150px}
+table.makers td .role{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+table.makers td .role:first-child{margin-top:0}
+@media (max-width: 1100px){
+  .bill{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bill > div:nth-child(3){border-left:0}
+  .bill > div:nth-child(n+3){border-top:1px solid var(--grid)}
+  .ladder{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rung:nth-child(4){border-left:0}
+  .rung:nth-child(n+4){border-top:1px solid var(--grid)}
+}
+@media (max-width: 700px){
+  .bill, .ladder{grid-template-columns:1fr}
+  .bill > div + div, .rung + .rung{border-left:0;border-top:1px solid var(--grid)}
+  .bill-notes{grid-template-columns:1fr}
+  .waterfall .seg{font-size:0}
+}
 
 .steps{padding:18vh 0 28vh}
 .step{
@@ -318,6 +386,7 @@ footer li{margin-bottom:6px}
         <li><a href="#step-6" data-step="6">Decode</a></li>
         <li><a href="#step-7" data-step="7">Screen</a></li>
         <li><a href="#step-8" data-step="8">Next turn</a></li>
+        <li class="more"><a href="#after-nav">After ↓</a></li>
       </ol>
       <svg id="stage" viewBox="0 0 800 640" role="img" aria-label="Animated diagram of the current step in the journey of a prompt through an AI system">
         <defs>
@@ -552,9 +621,182 @@ footer li{margin-bottom:6px}
   </div>
 </main>
 
-<section class="after">
+<nav class="after-nav" id="after-nav" aria-label="After the journey">
   <div class="wrap">
-    <div class="eyebrow">After the journey · closed vs open weights</div>
+    <span class="eyebrow pink">After the journey</span>
+    <a href="#bill">The bill for this answer</a>
+    <a href="#scale">Scale ladder</a>
+    <a href="#makers">Who makes what</a>
+    <a href="#open-vs-closed">Closed vs open</a>
+    <a href="#numbers">Numbers</a>
+    <a href="#privacy">Privacy</a>
+  </div>
+</nav>
+
+<section class="after" id="bill">
+  <div class="wrap">
+    <div class="eyebrow">This one answer · cost, energy, time</div>
+    <h2>The bill for the answer you just followed</h2>
+    <p class="lede">Everything below is computed from the prompt in the box at the top and the example answer, using typical 2026 list prices and hardware figures. Change the prompt and the numbers change. They are estimates with wide error bars, not a quote.</p>
+    <div class="bill" id="bill-cards">
+      <div>
+        <span class="k">what you are charged</span>
+        <div class="v" id="b-price">–</div>
+        <p class="sub"><b id="b-in">–</b> input tokens at $3 per million, <b id="b-out">–</b> output tokens at $15 per million. Frontier list prices span roughly $0.50 to $15 per million in, $2 to $75 out.</p>
+      </div>
+      <div>
+        <span class="k">raw compute inside that</span>
+        <div class="v" id="b-compute">–</div>
+        <p class="sub">Your share of an 8-GPU node renting at about $32 an hour: <b id="b-nodesec">–</b> of node time, most of it prefill. The gap to the price covers idle capacity, training the model, staff and margin.</p>
+      </div>
+      <div>
+        <span class="k">electricity</span>
+        <div class="v" id="b-wh">–<small>Wh</small></div>
+        <p class="sub">A 12 kW node for that share of a second, including cooling overhead. About <b id="b-led">–</b> of a 10 W LED bulb, or <b id="b-phone">–</b> of a phone charge. Providers report 0.2 to 0.4 Wh for a median text prompt; long reasoning answers reach several Wh.</p>
+      </div>
+      <div>
+        <span class="k">water</span>
+        <div class="v" id="b-water">–<small>mL</small></div>
+        <p class="sub">On-site cooling water evaporated for this answer, roughly <b id="b-drops">–</b>. Water used to generate the electricity upstream is several times more and depends entirely on the local grid.</p>
+      </div>
+    </div>
+    <div class="bill-notes">
+      <p><strong>Why it is so cheap.</strong> Step 3. Your request shares one pass through the model with about 48 others, so the node's cost per second is split 48 ways for decode. Prefill is not shared, which is why long prompts cost more than long answers in compute terms even though output tokens are priced higher.</p>
+      <p><strong>Where the money really goes.</strong> The compute for this answer is a small fraction of a cent. The price reflects the cluster sitting partly idle at 3 a.m., the training run that produced the model, and the people around it. A subscription flattens all of this into a monthly fee.</p>
+    </div>
+
+    <div class="waterfall" id="waterfall">
+      <p class="total"><span>Where the time goes · one answer</span><span id="w-total">–</span></p>
+      <div class="bar" role="img" aria-label="Latency breakdown for one answer, from sending the prompt to the last word rendered">
+        <div class="seg wire" id="w-wire">wire</div>
+        <div class="seg gate" id="w-gate">gate</div>
+        <div class="seg prefill" id="w-prefill">prefill</div>
+        <div class="seg first" id="w-first">first token</div>
+        <div class="seg decode" id="w-decode">decode</div>
+        <div class="seg render" id="w-render">render</div>
+      </div>
+      <ul class="legend">
+        <li><i style="background:var(--ground)"></i>wire, there and back <b id="l-wire">–</b></li>
+        <li><i style="background:#E4E9E5"></i>gateway and queue <b id="l-gate">–</b></li>
+        <li><i style="background:var(--green)"></i>prefill, grows with input <b id="l-prefill">–</b></li>
+        <li><i style="background:var(--green-tint)"></i>first token to your screen <b id="l-first">–</b></li>
+        <li><i style="background:var(--pink)"></i>decode, grows with output <b id="l-decode">–</b></li>
+        <li><i style="background:var(--pink-tint)"></i>render <b id="l-render">–</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="after" id="scale">
+  <div class="wrap">
+    <div class="eyebrow">Scale · from your request to the grid</div>
+    <h2>Six rungs from one answer to one power plant</h2>
+    <p class="lede">Each rung is roughly what your request touched, and what it takes to keep that rung running. Figures are typical for 2026 frontier serving and rounded.</p>
+    <div class="ladder">
+      <div class="rung">
+        <span class="k">your request</span>
+        <div class="v" id="r-req">–</div>
+        <ul>
+          <li><b id="r-req-wh">–</b> of electricity</li>
+          <li><b id="r-req-cost">–</b> of compute</li>
+          <li>one of about 48 in the batch</li>
+        </ul>
+      </div>
+      <div class="rung">
+        <span class="k">one GPU</span>
+        <div class="v">~1 kW</div>
+        <ul>
+          <li><b>$30–40k</b> to buy</li>
+          <li>holds one eighth of the model</li>
+          <li>reads memory at <b>5–8 TB/s</b></li>
+        </ul>
+      </div>
+      <div class="rung">
+        <span class="k">one node</span>
+        <div class="v">8 GPUs · ~12 kW</div>
+        <ul>
+          <li><b>~$350k</b> to buy, <b>~$32/h</b> to rent</li>
+          <li>one replica of the model</li>
+          <li>~50 conversations at once</li>
+        </ul>
+      </div>
+      <div class="rung">
+        <span class="k">one rack</span>
+        <div class="v">72 GPUs · ~120 kW</div>
+        <ul>
+          <li><b>$3–4M</b></li>
+          <li>liquid cooled, coolant near <b>45 °C</b></li>
+          <li>ten times a normal server rack's power</li>
+        </ul>
+      </div>
+      <div class="rung">
+        <span class="k">one building</span>
+        <div class="v">100 MW – 1 GW</div>
+        <ul>
+          <li><b>50k–500k</b> GPUs, <b>$10–50B</b> with chips</li>
+          <li>substation steps <b>115 kV</b> down to <b>415 V</b></li>
+          <li>cooling towers evaporate water to reject the heat</li>
+        </ul>
+      </div>
+      <div class="rung">
+        <span class="k">the grid</span>
+        <div class="v">1 GW ≈ one reactor</div>
+        <ul>
+          <li>or about <b>750,000</b> homes</li>
+          <li>grid connection wait <b>4–7 years</b></li>
+          <li>electricity, not chips, is the 2026 bottleneck</li>
+        </ul>
+      </div>
+    </div>
+    <p class="ladder-link">Want to build one and see the trade-offs move? <a href="https://jpatel3.github.io/datacenter-builder/">Data Center Builder</a> walks from a single chip to a ChatGPT-scale site, with power, cooling, networking and cost. This page stops here on purpose.</p>
+  </div>
+</section>
+
+<section class="after" id="makers">
+  <div class="wrap">
+    <div class="eyebrow">Who makes what</div>
+    <h2>The companies behind each step</h2>
+    <p class="lede">A sample of well-known names per layer, as of 2026. It is not complete and not a ranking. The point is how many separate industries one answer passes through.</p>
+    <div class="compare-wrap">
+      <table class="compare makers">
+        <thead>
+          <tr><th>Layer</th><th>Made or run by</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1 · your device<br>and the app</td>
+            <td><span class="role">devices</span>Apple, Samsung, Google, Microsoft, Lenovo<span class="role">chat apps</span>Anthropic, OpenAI, Google, Microsoft, Perplexity, Cursor</td>
+            <td>The app decides what goes into the system prompt and what is logged. That is where most of the privacy section lives.</td>
+          </tr>
+          <tr>
+            <td>2 · the wire</td>
+            <td><span class="role">fibre and cable</span>Corning, Prysmian, SubCom, Alcatel Submarine Networks, NEC<span class="role">routers and switches</span>Cisco, Arista, Juniper, Nokia<span class="role">edge and long haul</span>Cloudflare, Akamai, Equinix, AT&amp;T, Lumen, Zayo</td>
+            <td>Submarine cables carry almost all intercontinental traffic. Satellites are a fallback, not the main path.</td>
+          </tr>
+          <tr>
+            <td>3 · the data center</td>
+            <td><span class="role">operators</span>AWS, Microsoft Azure, Google Cloud, Oracle, CoreWeave, Crusoe, Nebius<span class="role">colocation</span>Equinix, Digital Realty<span class="role">power and cooling gear</span>Vertiv, Schneider Electric, Eaton, Trane<span class="role">generation</span>GE Vernova, Siemens Energy, Constellation, NextEra</td>
+            <td>Turbines and transformers have multi-year lead times in 2026, which is why sites are announced years before they serve a token.</td>
+          </tr>
+          <tr>
+            <td>4 · the GPU node</td>
+            <td><span class="role">accelerators</span>NVIDIA, AMD, Google TPU, AWS Trainium, Cerebras, Groq<span class="role">memory</span>SK hynix, Samsung, Micron (HBM)<span class="role">fab and tools</span>TSMC, ASML, Applied Materials, Lam Research, Tokyo Electron<span class="role">servers and interconnect</span>Dell, Supermicro, HPE, Foxconn, Quanta, Broadcom, NVIDIA Mellanox</td>
+            <td>One GPU die is fabricated by TSMC on tools from ASML, packaged with HBM from Korea or the US, and assembled into a server in Taiwan, Mexico or Texas.</td>
+          </tr>
+          <tr>
+            <td>5–6 · the model<br>and its engine</td>
+            <td><span class="role">models</span>Anthropic, OpenAI, Google DeepMind, Meta, xAI, DeepSeek, Alibaba Qwen, Mistral<span class="role">serving engines</span>vLLM, SGLang, NVIDIA TensorRT-LLM, llama.cpp<span class="role">hosting platforms</span>Baseten, Together AI, Fireworks, Modal, Hugging Face</td>
+            <td>Closed labs write their own engines. Open weights run on the open engines, which is the layer the hosting platforms sell.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="after" id="open-vs-closed">
+  <div class="wrap">
+    <div class="eyebrow">Closed vs open weights</div>
     <h2>Same eight steps. What changes is who runs them.</h2>
     <p class="lede">A closed model behind an API, an open-weight model on a hosting platform, and an open-weight model on your own laptop all follow this page. The difference is which steps you can see and control.</p>
     <div class="compare-wrap">
@@ -583,7 +825,7 @@ footer li{margin-bottom:6px}
   </div>
 </section>
 
-<section class="after outputs">
+<section class="after outputs" id="numbers">
   <div class="wrap">
     <div class="eyebrow pink">Other outputs · text, code and images</div>
     <h2>The language of the machine is numbers.</h2>
@@ -1507,11 +1749,52 @@ function buildAll(){
   scenes.length = 0;
   BUILDERS.forEach((b, i) => makeScene(i, b));
   applyActive();
+  updateBill();
+}
+
+/* ---------------- the bill: live estimates from the prompt ---------------- */
+const $ = id => document.getElementById(id);
+function setText(id, v){ const e = $(id); if (e) e.textContent = v; }
+function updateBill(){
+  const inTok = SYSTEM_TOK + HISTORY_TOK + TOK.length, outTok = ANS.length;
+  const PRICE_IN = 3, PRICE_OUT = 15;            // $ per million tokens, frontier list price
+  const NODE_HR = 32;                            // $ per 8-GPU node-hour rented
+  const PREFILL_TPS = 50000, DECODE_TPS = 70, BATCH = 48;
+  const NODE_KW = 12;                            // 8 GPUs + host + cooling overhead
+  const ML_PER_WH = 1.1;                         // on-site cooling water evaporated
+  const price = inTok / 1e6 * PRICE_IN + outTok / 1e6 * PRICE_OUT;       // dollars
+  const nodeSec = inTok / PREFILL_TPS + (outTok / DECODE_TPS) / BATCH;   // your share of node time
+  const compute = nodeSec / 3600 * NODE_HR;
+  const wh = NODE_KW * 1000 * nodeSec / 3600;
+  const ledSec = wh / 10 * 3600, phoneFrac = 15 / wh, ml = wh * ML_PER_WH;
+  const cents = x => x * 100 < 0.1 ? (x * 100).toFixed(3) + '¢' : (x * 100).toFixed(2) + '¢';
+  setText('b-price', cents(price));
+  setText('b-in', fmt(inTok)); setText('b-out', fmt(outTok));
+  setText('b-compute', cents(compute));
+  setText('b-nodesec', (nodeSec * 1000).toFixed(0) + ' ms');
+  const whEl = $('b-wh'); if (whEl){ whEl.innerHTML = ''; whEl.append(wh.toFixed(2)); const s = document.createElement('small'); s.textContent = 'Wh'; whEl.append(s); }
+  setText('b-led', ledSec < 90 ? Math.round(ledSec) + ' seconds' : (ledSec / 60).toFixed(1) + ' minutes');
+  setText('b-phone', '1/' + Math.round(phoneFrac));
+  const wEl = $('b-water'); if (wEl){ wEl.innerHTML = ''; wEl.append(ml.toFixed(2)); const s = document.createElement('small'); s.textContent = 'mL'; wEl.append(s); }
+  setText('b-drops', Math.max(1, Math.round(ml / 0.05)) + ' drops');
+  // latency waterfall (ms)
+  const L = { wire: 40, gate: 10, prefill: 50 + inTok * 0.2, first: 20, decode: outTok / DECODE_TPS * 1000, render: 15 };
+  const total = Object.values(L).reduce((a, b) => a + b, 0);
+  Object.keys(L).forEach(k => {
+    const pct = L[k] / total * 100;
+    const seg = $('w-' + k); if (seg){ seg.style.width = pct.toFixed(2) + '%'; seg.classList.toggle('tiny', pct < 7); }
+    setText('l-' + k, L[k] >= 1000 ? (L[k] / 1000).toFixed(2) + ' s' : Math.round(L[k]) + ' ms');
+  });
+  setText('w-total', '≈ ' + (total / 1000).toFixed(1) + ' s from send to last word');
+  // ladder rung 1
+  setText('r-req', (nodeSec * 1000).toFixed(0) + ' ms of one node');
+  setText('r-req-wh', wh.toFixed(2) + ' Wh');
+  setText('r-req-cost', cents(compute));
 }
 
 /* ---------------- activation + loop ---------------- */
 let active = 0, tActive = 0;
-const navLinks = Array.from(document.querySelectorAll('#depth-nav a'));
+const navLinks = Array.from(document.querySelectorAll('#depth-nav a[data-step]'));
 function applyActive(){
   scenes.forEach((s, i) => s.g.classList.toggle('active', i === active));
   navLinks.forEach((a, i) => { if (i === active) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current'); });
