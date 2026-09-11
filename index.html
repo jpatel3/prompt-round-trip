@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Round Trip</title>
+<meta name="description" content="Follow one chat prompt from your keyboard through the network, the data center, the GPU, prefill and decode, and back to your screen. Then see how the next question knows about the last.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F5F8F4;
+  --paper:#FFFFFF;
+  --grid:#D9D9D9;
+  --rule:#C9D1CB;
+  --ink:#0B0F0C;
+  --ink-2:#3F4A43;
+  --muted:#7C877F;
+  --green:#19E76E;
+  --green-ink:#049A52;
+  --green-tint:#D1FAE2;
+  --pink:#FFA9FD;
+  --pink-ink:#B0389F;
+  --pink-tint:#FFE3FE;
+  --mono:'Chivo Mono', ui-monospace, Menlo, Consolas, monospace;
+  --sans:'Instrument Sans', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --measure:62ch;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+.mono{font-family:var(--mono)}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";display:inline-block;width:22px;height:8px;background:var(--green)}
+.eyebrow.pink::before{background:var(--pink)}
+.wrap{max-width:1380px;margin:0 auto;padding:0 32px}
+
+/* ---------- hero ---------- */
+header.hero{border-bottom:1px solid var(--grid)}
+header.hero .wrap{
+  display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:48px;
+  padding-top:64px;padding-bottom:40px;
+}
+.hero h1{
+  font-family:var(--sans);font-weight:500;letter-spacing:-.025em;
+  font-size:clamp(40px,5.2vw,68px);line-height:1.02;margin:18px 0 20px;text-wrap:balance;
+  position:relative;
+}
+.hero h1 .blk{position:relative;display:inline-block;background:var(--pink);width:32px;height:14px;margin-left:14px;top:-.55em}
+.hero .lede{font-size:19px;line-height:1.45;color:var(--ink-2);max-width:var(--measure);margin:0}
+.hero .aside{display:flex;flex-direction:column;justify-content:flex-end;gap:28px}
+.prompt-field label{display:block;margin-bottom:10px}
+.prompt-field .field{
+  display:flex;align-items:center;gap:0;border:1px solid var(--ink);background:var(--paper);
+}
+.prompt-field input{
+  flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:16px;
+  padding:12px 14px;color:var(--ink);
+}
+.prompt-field input:focus-visible{box-shadow:inset 0 0 0 2px var(--green)}
+.prompt-field .count{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);
+  padding:0 14px;border-left:1px solid var(--grid);align-self:stretch;display:flex;align-items:center;white-space:nowrap;
+  background:var(--green-tint);
+}
+.prompt-field .hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.depth{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.depth .seg{display:inline-flex;border:1px solid var(--ink)}
+.depth button{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--paper);color:var(--ink);border:0;padding:9px 16px;cursor:pointer;
+}
+.depth button + button{border-left:1px solid var(--ink)}
+.depth button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.depth button:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+.depth .note{font-size:13px;color:var(--muted)}
+
+/* ---------- journey ---------- */
+main.journey .wrap{
+  display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px;align-items:start;
+}
+.stage{
+  position:sticky;top:0;height:100vh;
+  display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;align-items:center;
+}
+.stage svg{width:100%;height:auto;max-height:94vh;display:block}
+.stage svg .mono{font-family:var(--mono)}
+.stage svg .sans{font-family:var(--sans)}
+.scene{opacity:0;transition:opacity .45s ease;pointer-events:none}
+.scene.active{opacity:1;pointer-events:auto}
+.scene .nerd-only{opacity:0;transition:opacity .3s}
+body[data-depth="nerd"] .scene .nerd-only{opacity:1}
+.stream text{paint-order:stroke;stroke:var(--ground);stroke-width:3px;stroke-linejoin:round}
+
+.depth-nav{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.depth-nav li{display:flex}
+.depth-nav a{
+  display:grid;grid-template-columns:22px 1fr;align-items:center;gap:8px;text-decoration:none;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  padding:7px 0;
+}
+.depth-nav a::before{content:"";display:block;height:1px;background:var(--grid);width:14px;transition:width .2s,background .2s}
+.depth-nav a[aria-current="step"]{color:var(--ink)}
+.depth-nav a[aria-current="step"]::before{width:22px;background:var(--green);height:3px}
+.depth-nav a:hover{color:var(--ink)}
+
+.steps{padding:18vh 0 28vh}
+.step{
+  min-height:88vh;display:flex;flex-direction:column;justify-content:center;
+  padding:56px 0;border-top:1px solid var(--grid);
+}
+.step:first-child{border-top:0}
+.step h2{
+  font-weight:500;letter-spacing:-.02em;font-size:clamp(26px,2.6vw,36px);line-height:1.12;
+  margin:14px 0 18px;text-wrap:balance;max-width:24ch;
+}
+.step p{max-width:var(--measure);margin:0 0 14px;color:var(--ink-2)}
+.step p strong{color:var(--ink);font-weight:600}
+.step .simple > p:first-child{color:var(--ink);font-size:17.5px}
+.nerd{display:none;margin-top:22px;border-top:1px dashed var(--rule);padding-top:18px}
+body[data-depth="nerd"] .nerd{display:block}
+.nerd .tag{
+  display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--pink-ink);background:var(--pink-tint);padding:3px 8px;margin-bottom:12px;
+}
+.nerd dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 20px;margin:0 0 14px;max-width:var(--measure)}
+.nerd dt{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);padding-top:2px}
+.nerd dd{margin:0;color:var(--ink-2);font-size:15px}
+.nerd code, .step code{
+  font-family:var(--mono);font-size:.86em;background:var(--paper);border:1px solid var(--grid);padding:1px 5px;border-radius:2px;
+}
+.nerd .formula{
+  font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--paper);border:1px solid var(--grid);
+  padding:12px 14px;margin:0 0 14px;overflow-x:auto;white-space:nowrap;max-width:var(--measure);
+}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--grid);margin-top:8vh}
+footer .wrap{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:48px;padding-top:40px;padding-bottom:64px}
+footer h3{font-weight:500;font-size:18px;letter-spacing:-.01em;margin:14px 0 10px}
+footer p, footer li{font-size:14.5px;color:var(--ink-2);max-width:var(--measure)}
+footer ul{padding-left:18px;margin:0}
+footer li{margin-bottom:6px}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px){
+  .stage{grid-template-columns:1fr}
+  .depth-nav{display:none}
+}
+@media (max-width: 900px){
+  .wrap{padding:0 20px}
+  header.hero .wrap, footer .wrap{grid-template-columns:1fr;gap:28px;padding-top:44px}
+  .hero .aside{justify-content:flex-start}
+  main.journey .wrap{grid-template-columns:1fr;gap:0}
+  .stage{
+    height:46vh;background:var(--ground);border-bottom:1px solid var(--grid);z-index:2;
+    padding:8px 0;
+  }
+  .stage svg{max-height:44vh;margin:0 auto}
+  .steps{padding:6vh 0 20vh}
+  .step{min-height:0;padding:40px 0}
+  .step h2{font-size:26px}
+}
+@media (prefers-reduced-motion: reduce){
+  .scene{transition:none}
+}
+</style>
+</head>
+<body data-depth="simple">
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">An explainer · one request, followed end to end</div>
+      <h1>Where your question goes<span class="blk" aria-hidden="true"></span></h1>
+      <p class="lede">You type a sentence into Claude or ChatGPT and a paragraph types itself back. In between: a tokenizer, a few thousand kilometres of fibre, a scheduler, eight GPUs, a cache, and a loop that runs once per word. Scroll to follow one prompt the whole way round, and see why the next question knows about the last one.</p>
+    </div>
+    <div class="aside">
+      <div class="prompt-field">
+        <label class="eyebrow" for="prompt">The prompt we'll follow</label>
+        <div class="field">
+          <input id="prompt" type="text" value="What is the implication of AI on software development jobs?" spellcheck="false" autocomplete="off" maxlength="160">
+          <span class="count" id="tokcount">12 tokens</span>
+        </div>
+        <p class="hint">Edit it. The tokens on the wires change with it.</p>
+      </div>
+      <div class="depth" role="group" aria-label="Explanation depth">
+        <span class="seg">
+          <button type="button" data-depth="simple" aria-pressed="true">Simple</button>
+          <button type="button" data-depth="nerd" aria-pressed="false">Nerd</button>
+        </span>
+        <span class="note">Nerd adds the internals: formulas, sizes, protocol details.</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="journey">
+  <div class="wrap">
+    <div class="stage" id="stage-wrap">
+      <ol class="depth-nav" id="depth-nav" aria-label="Steps">
+        <li><a href="#step-1" data-step="1">Device</a></li>
+        <li><a href="#step-2" data-step="2">Wire</a></li>
+        <li><a href="#step-3" data-step="3">Data center</a></li>
+        <li><a href="#step-4" data-step="4">GPU node</a></li>
+        <li><a href="#step-5" data-step="5">Prefill</a></li>
+        <li><a href="#step-6" data-step="6">Decode</a></li>
+        <li><a href="#step-7" data-step="7">Screen</a></li>
+        <li><a href="#step-8" data-step="8">Next turn</a></li>
+      </ol>
+      <svg id="stage" viewBox="0 0 800 640" role="img" aria-label="Animated diagram of the current step in the journey of a prompt through an AI system">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#0B0F0C"></path>
+          </marker>
+          <marker id="arr-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#049A52"></path>
+          </marker>
+          <marker id="arr-pink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#B0389F"></path>
+          </marker>
+        </defs>
+        <g id="frame">
+          <line x1="24" y1="24" x2="776" y2="24" stroke="#D9D9D9" stroke-width="1"></line>
+          <line x1="24" y1="616" x2="776" y2="616" stroke="#D9D9D9" stroke-width="1"></line>
+          <line x1="24" y1="24" x2="24" y2="616" stroke="#D9D9D9" stroke-width="1"></line>
+          <line x1="776" y1="24" x2="776" y2="616" stroke="#D9D9D9" stroke-width="1"></line>
+        </g>
+        <g id="scenes"></g>
+      </svg>
+    </div>
+
+    <div class="steps" id="steps">
+
+      <article class="step" id="step-1" data-step="1">
+        <div class="eyebrow">Step 1 of 8 · your device</div>
+        <h2>Words become numbers before they leave your hand</h2>
+        <div class="simple">
+          <p>You typed a sentence. The app does not send sentences. It chops your text into <strong>tokens</strong>: chunks of roughly three or four characters that the model has a numbered vocabulary for. Your question becomes about a dozen of them.</p>
+          <p>The app also bundles in things you never see. A <strong>system prompt</strong> describing how the assistant should behave, and every earlier message in this chat. All of it is packed into one request, encrypted, and sent.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Tokenizer</dt><dd>Byte-pair encoding over a vocabulary of roughly 100k to 200k entries. A leading space is part of the token, so <code>" is"</code> and <code>"is"</code> are different ids. Rare words split into several tokens; common ones are one. The ids shown on the stage are illustrative, the split is approximate.</dd>
+            <dt>Request body</dt><dd>One JSON document: <code>model</code>, <code>system</code>, a <code>messages[]</code> array of alternating user and assistant turns, <code>max_tokens</code>, and <code>stream: true</code> so the answer can arrive piecewise.</dd>
+            <dt>Size</dt><dd>A few kilobytes for a fresh chat. Hundreds of kilobytes for a long one, because the whole history travels again every turn. Step 8 is about why.</dd>
+            <dt>Transport</dt><dd>HTTPS over TLS 1.3. One handshake, then the request is a single POST whose response stays open while the answer streams.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-2" data-step="2">
+        <div class="eyebrow">Step 2 of 8 · the wire</div>
+        <h2>Your question crosses the country faster than you blink</h2>
+        <div class="simple">
+          <p>The encrypted request hops from your Wi-Fi to your internet provider, then onto long-haul fibre where light carries it at about two thirds of its speed in a vacuum.</p>
+          <p>It lands at an <strong>edge point of presence</strong> near a data center. There the provider's <strong>API gateway</strong> opens the encryption, checks who you are and how much you are allowed to send, and routes you to a region that is running the model you asked for. The whole trip takes tens of milliseconds, a fraction of the time you will wait for the first word.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Anycast</dt><dd>The API's IP address is announced from many locations at once. Internet routing delivers you to the closest edge, not a single origin.</dd>
+            <dt>TLS termination</dt><dd>The edge decrypts, so everything inside the provider's network is plain HTTP over private links.</dd>
+            <dt>Auth and limits</dt><dd>API key or session cookie resolves to an organization and a tier. Rate limits are enforced per organization on requests per minute and tokens per minute. Over the limit means a 429 before any GPU is touched.</dd>
+            <dt>Routing</dt><dd>Pick a region and cluster that has the requested model loaded and has capacity. If none does, the request waits in a queue here rather than at the GPU.</dd>
+            <dt>Latency budget</dt><dd>Typically 20 to 80 ms one way. This is the smallest slice of what you wait for; the model itself is the rest.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-3" data-step="3">
+        <div class="eyebrow">Step 3 of 8 · the data center</div>
+        <h2>You share the machine with strangers</h2>
+        <div class="simple">
+          <p>The building holds rows of racks, each full of GPUs, with copies of the model, called <strong>replicas</strong>, loaded on many of them. A <strong>scheduler</strong> picks a replica with room for you.</p>
+          <p>Your request does not run alone. It is merged into a <strong>batch</strong> with dozens of other people's requests that arrive around the same moment, because running a batch costs almost the same as running one request. This sharing is why a query costs cents rather than dollars.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Replica</dt><dd>One loaded copy of the model on one node, or a few nodes for the largest models. A cluster serves a model with tens to thousands of replicas.</dd>
+            <dt>Continuous batching</dt><dd>New requests join the running batch between decode steps and finished ones leave. Nobody waits for the slowest sequence to finish before the next batch starts.</dd>
+            <dt>Scheduler goals</dt><dd>Keep the GPUs busy, keep queue time low, and never let the batch's KV cache (step 5) overflow GPU memory. Those three fight each other.</dd>
+            <dt>Physical scale</dt><dd>A rack of eight-GPU nodes draws about 120 kW and is liquid cooled. A site is 100 MW to over 1 GW. Your request touches one rack for about a second.</dd>
+            <dt>Queue time</dt><dd>Single-digit milliseconds when the region is quiet. It is the first thing to grow when a region is hot.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-4" data-step="4">
+        <div class="eyebrow">Step 4 of 8 · the GPU node</div>
+        <h2>The model is too big for one chip</h2>
+        <div class="simple">
+          <p>A frontier model's <strong>weights</strong>, the numbers learned in training, run to hundreds of gigabytes. No single chip holds that, so the model is sliced across the eight GPUs in one server, each keeping one eighth in its <strong>high-bandwidth memory</strong> (HBM). Links between the GPUs are fast enough that they behave like one large chip.</p>
+          <p>The surprising fact about generating text: the limit is how fast weights can be read out of memory, not how much arithmetic the chips can do. Every token that comes out requires reading the whole model once.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Tensor parallelism</dt><dd>Each layer's weight matrices are split column- or row-wise across the 8 GPUs. After each layer an all-reduce over NVLink combines the partial results.</dd>
+            <dt>HBM</dt><dd>144 to 288 GB per GPU in 2026 parts, at 5 to 8 TB/s. This bandwidth, divided by the bytes of weights, sets the ceiling on tokens per second at small batch sizes.</dd>
+            <dt>NVLink</dt><dd>About 1.8 TB/s per GPU between the eight. Node-to-node traffic goes over InfiniBand or Ethernet at a tenth of that, which is why a model is kept inside one node when it fits.</dd>
+            <dt>Precision</dt><dd>Weights stored as FP8 or bf16, one or two bytes per parameter. A 400B-parameter model at FP8 is about 400 GB, or 50 GB per GPU.</dd>
+            <dt>Why batching</dt><dd>At batch size 1, each decode step reads every weight to produce one token. At batch size 64 it reads them once for 64 tokens. Compute is nearly free until the batch is large. That is the economics of step 3.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-5" data-step="5">
+        <div class="eyebrow">Step 5 of 8 · prefill</div>
+        <h2>The model reads your whole question at once</h2>
+        <div class="simple">
+          <p>Now the model runs. In its first pass, called <strong>prefill</strong>, it processes all your tokens simultaneously, layer by layer. Within each layer every token looks back at every earlier token to decide what matters. That mechanism is <strong>attention</strong>.</p>
+          <p>As it goes it writes down a compact set of notes about each token, called the <strong>KV cache</strong>, so it never has to re-read the question. Prefill ends when the first token of the answer is ready. The pause before a reply starts to appear is this pass.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Q, K, V</dt><dd>In each layer, each token's vector is projected into a Query, a Key and a Value. The attention weight from token i to token j is <code>softmax(Q_i · K_j / √d)</code>, computed only for j ≤ i (causal). The output for i is the weighted sum of the V_j.</dd>
+            <dt>KV cache</dt><dd>Every K and V, for every token, at every layer, is stored so decode steps can attend to the prompt without recomputing it.</dd>
+          </dl>
+          <div class="formula">bytes per token ≈ 2 (K and V) × layers × kv_heads × head_dim × bytes_per_value</div>
+          <dl>
+            <dt>Worked size</dt><dd>80 layers, 8 KV heads of 128 (grouped-query attention), bf16: 2 × 80 × 8 × 128 × 2 = 320 KB per token. Your prompt is a few megabytes. A 100k-token context is about 32 GB, on top of the weights. This is what limits how many requests fit in one batch.</dd>
+            <dt>Cost profile</dt><dd>Prefill is compute-bound and parallel, so it is fast per token but grows with prompt length. Time to first token is mostly prefill plus queue time: 200 ms to a couple of seconds.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-6" data-step="6">
+        <div class="eyebrow">Step 6 of 8 · decode</div>
+        <h2>One token at a time, sent the instant it exists</h2>
+        <div class="simple">
+          <p>The model produces the answer one token per loop. For each: read the KV cache, score every entry in the vocabulary, pick one, append it to the cache, repeat. A sixty-word answer is about eighty loops of a few milliseconds each.</p>
+          <p>Each new token is pushed back down the wire immediately. That is why the answer types out in front of you rather than appearing whole. The model is still writing while you are already reading.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>One step</dt><dd>A forward pass over a single new token per sequence in the batch. Attention reads the whole KV cache for that sequence. Output is a vector of logits, one per vocabulary entry.</dd>
+            <dt>Sampling</dt><dd>Logits divided by temperature, softmaxed, then truncated by top-p or top-k, then one id drawn. Temperature 0 means take the arg max every time.</dd>
+            <dt>Speed</dt><dd>50 to 150 tokens per second per sequence. Each step re-reads all the weights, so this is bounded by HBM bandwidth and shared across the batch.</dd>
+            <dt>Streaming</dt><dd>Each token, or small group, is sent as a server-sent event on the still-open HTTP response.</dd>
+            <dt>Reasoning models</dt><dd>May decode thousands of hidden tokens before the first visible one. Same loop, longer wait.</dd>
+            <dt>Speculative decoding</dt><dd>A small draft model guesses several tokens ahead; the large model verifies them all in one pass. Accepted guesses come out for the price of one step.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-7" data-step="7">
+        <div class="eyebrow">Step 7 of 8 · back on your screen</div>
+        <h2>The stream is stitched back into text</h2>
+        <div class="simple">
+          <p>Your app receives a trickle of small events, each carrying a fragment of text. It appends them to the message bubble as they arrive and renders formatting, headings and lists, as soon as it can tell what they are.</p>
+          <p>The final event says why the model stopped, because it finished or hit the length limit, and how many tokens went in and came out. That count is what the bill is based on.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Server-sent events</dt><dd>Content type <code>text/event-stream</code>. Each event is an <code>event:</code> line and a <code>data:</code> line of JSON. Deltas are text fragments; they need not align with tokens or words.</dd>
+            <dt>Rendering</dt><dd>Markdown is re-parsed on every delta, with care for an unclosed code fence or list mid-stream. Good clients render optimistically and fix up when the closing marker arrives.</dd>
+            <dt>Terminal events</dt><dd><code>stop_reason</code> is one of end_turn, max_tokens, stop_sequence, or tool_use. <code>usage</code> reports input tokens, output tokens, and cache reads and writes.</dd>
+            <dt>Tool use</dt><dd>If the model decided to call a tool, the stream ends with a structured request instead of prose. The app runs the tool and sends a new request with the result appended. Same round trip, again.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-8" data-step="8">
+        <div class="eyebrow pink">Step 8 of 8 · your next question</div>
+        <h2>The model remembers nothing. The app does.</h2>
+        <div class="simple">
+          <p>You ask a follow-up. The model has no memory of the exchange it just finished. The moment the last token left, it forgot you.</p>
+          <p>What makes the conversation continue is your app. It <strong>re-sends the entire transcript</strong>, system prompt, first question, the answer and the new question, on every turn. That is why long chats slow down and cost more.</p>
+          <p>The provider softens this with a <strong>prompt cache</strong>. The start of the transcript is identical to last turn, so the server reuses the KV cache it built then and only processes the new part. Eventually the transcript hits the <strong>context window</strong> limit, and the app has to summarize or drop old turns.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Stateless inference</dt><dd>Every API call is independent. Server-side state after a call is nothing but the cache below and a usage log.</dd>
+            <dt>Prompt caching</dt><dd>Exact prefix match on the token sequence. Cached KV blocks live in HBM or host memory for a time-to-live of about five minutes by default, longer on some tiers. Cache reads are billed at roughly a tenth of the normal input price, cache writes a little above it.</dd>
+            <dt>Turn two</dt><dd>Prefill covers only the uncached suffix, so time to first token drops from hundreds of milliseconds to tens. Anything that changes the prefix, a timestamp in the system prompt say, defeats the cache.</dd>
+            <dt>Context window</dt><dd>200k to 1M tokens. Usage grows by every turn's input plus output. When full, apps truncate the oldest turns, compact them into a summary, or retrieve relevant past turns instead of sending all of them.</dd>
+            <dt>"Memory" features</dt><dd>A store of facts about you, injected into the system prompt. Useful, but from the model's side it is just more tokens in the request.</dd>
+          </dl>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Caveats</div>
+      <h3>What is simplified here</h3>
+      <ul>
+        <li>Numbers are typical of frontier-model serving in 2026: GPUs with 144 to 288 GB of HBM, models of a few hundred billion parameters, 80-ish layers with grouped-query attention. Real deployments differ by vendor, model and day.</li>
+        <li>The tokenizer on the stage splits on words and punctuation and breaks long words in two. Real byte-pair tokenizers split differently and the ids shown are illustrative.</li>
+        <li>Some providers shard a model across more than one node, use mixture-of-experts layers, or run prefill and decode on separate machines. The shape of the journey is the same.</li>
+        <li>Nothing here calls any API. The answer text is a fixed example.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="eyebrow">Colour key</div>
+      <h3>How to read the stage</h3>
+      <ul>
+        <li><strong style="color:var(--green-ink)">Green</strong> is your request and anything computed from it on this turn.</li>
+        <li><strong style="color:var(--pink-ink)">Pink</strong> is what is new: generated tokens, and the uncached part of a follow-up.</li>
+        <li>Grey is other people's traffic and the machinery that is there whether or not you ask anything.</li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('stage');
+const scenesRoot = document.getElementById('scenes');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const C = {
+  ink:'#0B0F0C', ink2:'#3F4A43', muted:'#7C877F', grid:'#D9D9D9', rule:'#C9D1CB', ground:'#F5F8F4', paper:'#FFFFFF',
+  green:'#19E76E', greenInk:'#049A52', greenTint:'#D1FAE2',
+  pink:'#FFA9FD', pinkInk:'#B0389F', pinkTint:'#FFE3FE',
+  top:'#FFFFFF', left:'#EDF2EE', right:'#DCE3DE', floor:'#EEF3EF'
+};
+
+/* ---------------- primitives ---------------- */
+function el(tag, attrs, parent){
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function text(parent, x, y, str, o){
+  o = o || {};
+  const t = el('text', {
+    x: x, y: y, 'text-anchor': o.anchor || 'start', 'font-size': o.size || 11,
+    fill: o.fill || C.ink, 'font-weight': o.weight || 400, 'letter-spacing': o.ls || 0,
+    opacity: o.opacity, class: (o.sans ? 'sans' : 'mono') + (o.cls ? ' ' + o.cls : '')
+  }, parent);
+  t.textContent = str;
+  return t;
+}
+function label(parent, x, y, str, o){
+  o = o || {};
+  return text(parent, x, y, String(str).toUpperCase(), Object.assign({size:9.5, fill:C.muted, ls:0.7}, o));
+}
+function lines(parent, x, y, arr, o){
+  o = o || {};
+  const lh = o.lh || 13;
+  arr.forEach((s, i) => text(parent, x, y + i*lh, s, o));
+  return y + arr.length*lh;
+}
+function wrap(str, max){
+  const words = String(str).split(/\s+/).filter(Boolean), out = [];
+  let cur = '';
+  for (const w of words){
+    if ((cur + ' ' + w).trim().length > max && cur){ out.push(cur); cur = w; }
+    else cur = cur ? cur + ' ' + w : w;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+const fmt = n => Math.round(n).toLocaleString('en-US');
+
+/* isometric projection: x runs right-down, y runs left-down, z up */
+function P(ox, oy, x, y, z){ return [ox + (x - y)*0.866, oy + (x + y)*0.5 - z]; }
+function poly(parent, pts, attrs){
+  return el('polygon', Object.assign({points: pts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}, attrs), parent);
+}
+function cube(parent, ox, oy, x, y, z, w, d, h, o){
+  o = o || {};
+  const g = el('g', {class:'cube'}, parent);
+  const q = (a,b,c) => P(ox, oy, a, b, c);
+  const stroke = o.stroke || C.ink, sw = o.sw || 1;
+  const base = {stroke: stroke, 'stroke-width': sw, 'stroke-linejoin':'round'};
+  if (h > 0){
+    poly(g, [q(x,y+d,z), q(x+w,y+d,z), q(x+w,y+d,z+h), q(x,y+d,z+h)], Object.assign({fill:o.left||C.left}, base));
+    poly(g, [q(x+w,y,z), q(x+w,y+d,z), q(x+w,y+d,z+h), q(x+w,y,z+h)], Object.assign({fill:o.right||C.right}, base));
+  }
+  poly(g, [q(x,y,z+h), q(x+w,y,z+h), q(x+w,y+d,z+h), q(x,y+d,z+h)], Object.assign({fill:o.top||C.top}, base));
+  g.topCenter = q(x + w/2, y + d/2, z + h);
+  return g;
+}
+/* a standing plane in x-z (like a screen) and a group whose coordinates are plane coordinates */
+function screenPlane(parent, ox, oy, x, y, z, w, h, o){
+  o = o || {};
+  const q = (a,b,c) => P(ox, oy, a, b, c);
+  poly(parent, [q(x,y,z), q(x+w,y,z), q(x+w,y,z+h), q(x,y,z+h)], {fill:o.fill||C.paper, stroke:o.stroke||C.ink, 'stroke-width':1, 'stroke-linejoin':'round'});
+  const O = q(x, y, z + h);
+  return el('g', {transform: 'matrix(0.866 0.5 0 1 ' + O[0].toFixed(2) + ' ' + O[1].toFixed(2) + ')'}, parent);
+}
+function wire(parent, d, o){
+  o = o || {};
+  return el('path', {d: d, fill:'none', stroke:o.stroke||C.ink, 'stroke-width':o.sw||1, 'stroke-dasharray':o.dash||null,
+    'stroke-linejoin':'round', 'stroke-linecap':'round', 'marker-end': o.arrow ? 'url(#' + o.arrow + ')' : null}, parent);
+}
+function pathThrough(pts){
+  return pts.map((p,i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+}
+function frameTitle(s, num, title, caption){
+  el('rect', {x:36, y:38, width:22, height:8, fill: s.i === 7 ? C.pink : C.green}, s.g);
+  text(s.g, 66, 46, num + ' · ' + title.toUpperCase(), {size:10.5, ls:1, fill:C.ink, weight:500});
+  if (caption){
+    const ls = wrap(caption, 92);
+    lines(s.g, 36, 592 - (ls.length-1)*14, ls, {size:11.5, fill:C.ink2, sans:true, lh:14});
+  }
+}
+
+/* characters riding a wire */
+class Stream {
+  constructor(parent, path, chars, o){
+    o = o || {};
+    this.path = path; this.chars = chars.length ? chars : ['·'];
+    this.len = Math.max(1, path.getTotalLength());
+    this.n = o.n || Math.max(4, Math.min(22, Math.floor(this.len / 26)));
+    this.speed = o.speed || 55; this.gap = this.len / this.n; this.offset = 0;
+    this.g = el('g', {class:'stream'}, parent); this.nodes = [];
+    for (let i = 0; i < this.n; i++){
+      const t = text(this.g, 0, 0, this.chars[i % this.chars.length], {size:o.size||10.5, fill:o.fill||C.greenInk, anchor:'middle', weight:500});
+      t.setAttribute('dominant-baseline', 'middle');
+      this.nodes.push(t);
+    }
+    this.tick(0);
+  }
+  tick(dt){
+    this.offset = (this.offset + this.speed*dt) % this.gap;
+    for (let i = 0; i < this.n; i++){
+      const s = (i*this.gap + this.offset) % this.len;
+      const p = this.path.getPointAtLength(s);
+      this.nodes[i].setAttribute('x', p.x.toFixed(1));
+      this.nodes[i].setAttribute('y', p.y.toFixed(1));
+    }
+  }
+}
+
+/* ---------------- tokenizer (approximate) ---------------- */
+function tokenize(str){
+  const out = [];
+  const re = /\s*[A-Za-z]+|\s*\d+|\s*[^\sA-Za-z\d]+/g;
+  let m;
+  while ((m = re.exec(str))){
+    const t = m[0];
+    const lead = t.match(/^\s*/)[0];
+    const w = t.slice(lead.length);
+    if (/^[A-Za-z]+$/.test(w) && w.length > 7){
+      const cut = Math.ceil(w.length * 0.55);
+      out.push(lead + w.slice(0, cut)); out.push(w.slice(cut));
+    } else out.push(t);
+  }
+  return out;
+}
+function tokId(t){
+  let h = 2166136261;
+  for (let i = 0; i < t.length; i++){ h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return 1000 + (h % 98000);
+}
+function charsOf(tokens){
+  const s = tokens.join('').replace(/\s+/g, ' ');
+  return s.split('').filter(c => c !== ' ');
+}
+const disp = t => t.replace(/^ /, '·');
+function chipWidth(t){ return disp(t).length * 6.1 + 12; }
+function chip(parent, x, y, tok, o){
+  o = o || {};
+  const w = chipWidth(tok);
+  const g = el('g', {}, parent);
+  const r = el('rect', {x:x, y:y, width:w, height:18, rx:2, fill:o.fill||C.paper, stroke:o.stroke||C.ink, 'stroke-width':1}, g);
+  text(g, x + w/2, y + 12.5, disp(tok), {anchor:'middle', size:10, fill:o.color||C.ink});
+  if (o.id !== false) text(g, x + w/2, y + 29, String(tokId(tok)), {anchor:'middle', size:8, fill:C.muted});
+  return {g:g, rect:r, w:w, cx:x + w/2, x:x, y:y};
+}
+function chipRow(parent, x0, y0, tokens, maxX, o){
+  o = o || {};
+  let x = x0, y = y0; const out = [];
+  const rowH = o.id === false ? 26 : 40;
+  tokens.forEach((t, i) => {
+    const w = chipWidth(t);
+    if (x + w > maxX && x > x0){ x = x0; y += rowH; }
+    const opts = Object.assign({}, o);
+    if (o.fillFn) opts.fill = o.fillFn(i);
+    const c = chip(parent, x, y, t, opts);
+    out.push(c); x += w + 6;
+  });
+  return {chips: out, bottom: y + (o.id === false ? 20 : 34), rows: (y - y0)/rowH + 1};
+}
+
+/* ---------------- content ---------------- */
+const ANSWER = 'AI is changing what software jobs are more than how many there are. Routine code is increasingly generated, so the value shifts to framing problems, reviewing output, and owning systems end to end.';
+const FOLLOWUP = 'Which roles are safest?';
+const SYSTEM_TOK = 1204;
+const HISTORY_TOK = 0; // this is the first turn of a fresh chat; step 8 adds the second
+const KV_PER_TOK = 320 * 1024; // bytes, 80 layers, 8 kv heads x 128, bf16
+const DISTRACT = [' roles', ' work', ' teams', ' tools', ' the', ' more', ' code', ' and', ' how', ' people', ' also', ' new'];
+
+let PROMPT = document.getElementById('prompt').value;
+let TOK = tokenize(PROMPT);
+let ANS = tokenize(ANSWER);
+let FUP = tokenize(FOLLOWUP);
+
+/* ---------------- scenes ---------------- */
+const scenes = [];
+function makeScene(i, builder){
+  const g = el('g', {class:'scene', 'data-scene': i}, scenesRoot);
+  const s = {g: g, streams: [], anims: [], i: i};
+  builder(s);
+  scenes.push(s);
+  return s;
+}
+
+/* 1 · device */
+function scene1(s){
+  frameTitle(s, '01', 'Your device', 'The sentence is split into tokens, each with a vocabulary id. The app packs them with the system prompt and the earlier turns into one encrypted request.');
+  const ox = 190, oy = 380;
+  cube(s.g, ox, oy, 0, 0, 0, 170, 120, 10, {top:'#F8FAF8'});
+  // keyboard hint on base top: a few faint lines
+  for (let k = 0; k < 4; k++){
+    const a = P(ox, oy, 20, 22 + k*20, 10), b = P(ox, oy, 150, 22 + k*20, 10);
+    el('line', {x1:a[0], y1:a[1], x2:b[0], y2:b[1], stroke:C.grid, 'stroke-width':1}, s.g);
+  }
+  const plane = screenPlane(s.g, ox, oy, 0, 0, 10, 170, 120);
+  // chat bubble in plane coords (u 0..170, v 0..120)
+  el('rect', {x:10, y:14, width:150, height:64, rx:3, fill:C.ground, stroke:C.grid}, plane);
+  const pl = wrap(PROMPT, 30).slice(0, 4);
+  lines(plane, 18, 30, pl, {size:8.5, sans:true, lh:12, fill:C.ink});
+  const cursor = el('rect', {x:18 + Math.min(150, (pl[pl.length-1]||'').length*4.6), y:22 + (pl.length-1)*12, width:1.5, height:10, fill:C.ink}, plane);
+  el('rect', {x:10, y:92, width:150, height:18, rx:3, fill:C.paper, stroke:C.ink, 'stroke-width':0.8}, plane);
+  label(plane, 18, 104, 'send', {size:7.5, fill:C.muted});
+  el('rect', {x:132, y:96, width:22, height:10, fill:C.green}, plane);
+  s.anims.push(t => cursor.setAttribute('opacity', Math.floor(t*2) % 2 ? 0 : 1));
+  label(s.g, 40, 306, 'your device', {fill:C.ink});
+  label(s.g, 40, 320, 'the app you type into', {size:8.5});
+
+  // tokens
+  label(s.g, 430, 96, 'tokens · ' + TOK.length + ' · with vocabulary ids', {fill:C.ink});
+  const row = chipRow(s.g, 430, 108, TOK, 770, {});
+  label(s.g, 430, row.bottom + 12, '· marks a leading space, part of the token', {size:8.5, cls:'nerd-only'});
+
+  // request card
+  const cy = Math.max(330, row.bottom + 40);
+  el('rect', {x:430, y:cy, width:340, height:170, fill:C.paper, stroke:C.ink}, s.g);
+  el('rect', {x:430, y:cy, width:340, height:22, fill:C.ink}, s.g);
+  text(s.g, 440, cy + 15, 'POST /v1/messages', {size:10, fill:C.paper, weight:500});
+  text(s.g, 700, cy + 15, 'stream: true', {size:9, fill:C.green, anchor:'end'});
+  const short = PROMPT.length > 34 ? PROMPT.slice(0, 33) + '…' : PROMPT;
+  const cardLines = [
+    'system:   "You are a helpful assistant…"',
+    '          ' + fmt(SYSTEM_TOK) + ' tok',
+    'messages: [ first turn of a new chat ]',
+    'user:     "' + short + '"',
+    '          ' + TOK.length + ' tok',
+    'max_tokens: 1024'
+  ];
+  lines(s.g, 440, cy + 42, cardLines, {size:9.5, lh:15, fill:C.ink});
+  el('rect', {x:440, y:cy + 138, width:124, height:18, fill:C.greenTint, stroke:C.greenInk, 'stroke-width':0.8}, s.g);
+  label(s.g, 448, cy + 150.5, 'TLS 1.3 · encrypted', {size:8.5, fill:C.greenInk});
+  text(s.g, 760, cy + 150.5, '≈ ' + fmt((SYSTEM_TOK + HISTORY_TOK + TOK.length) * 4.2 / 1024) + ' KB', {size:9.5, anchor:'end', fill:C.muted});
+  label(s.g, 578, cy + 150.5, 'total ' + fmt(SYSTEM_TOK + HISTORY_TOK + TOK.length) + ' tok', {size:8.5, cls:'nerd-only'});
+
+  // wire from screen to card
+  const start = P(ox, oy, 170, 0, 70);
+  const d = pathThrough([start, [start[0] + 30, start[1]], [start[0] + 30, cy + 90], [428, cy + 90]]);
+  const w = wire(s.g, d, {arrow:'arr'});
+  s.streams.push(new Stream(s.g, w, charsOf(TOK), {speed:50}));
+  // dashed relation tokens -> card
+  wire(s.g, pathThrough([[748, row.bottom + 4], [748, cy - 2]]), {dash:'3 4', stroke:C.muted, arrow:'arr'});
+  label(s.g, 740, (row.bottom + cy)/2 + 3, 'becomes messages[last]', {size:8.5, anchor:'end'});
+}
+
+/* 2 · the wire */
+function scene2(s){
+  frameTitle(s, '02', 'The wire', 'Encrypted, the request hops to your provider, rides long-haul fibre, and is decrypted at an edge near the data center. The gateway checks identity and limits, then routes to a region.');
+  const nodes = [
+    {ox:96,  oy:500, w:40, d:40, h:22, name:'your device', sub:''},
+    {ox:222, oy:462, w:40, d:40, h:22, name:'wi-fi router', sub:'first hop · ~2 ms'},
+    {ox:348, oy:424, w:40, d:40, h:22, name:'ISP', sub:'last mile · +5 ms'},
+    {ox:582, oy:346, w:40, d:40, h:22, name:'edge PoP', sub:'TLS ends here · +15 ms'},
+    {ox:686, oy:280, w:48, d:48, h:28, name:'API gateway', sub:'auth · limits · route', green:true}
+  ];
+  const pts = [];
+  nodes.forEach(n => {
+    const c = cube(s.g, n.ox, n.oy, 0, 0, 0, n.w, n.d, n.h, n.green ? {top:C.green} : {});
+    pts.push(c.topCenter);
+    const lx = n.ox - 4, ly = n.oy + (n.w + n.d)*0.5 + 16;
+    label(s.g, lx, ly, n.name, {fill:C.ink, anchor:'middle'});
+    if (n.sub) label(s.g, lx, ly + 12, n.sub, {size:8.5, anchor:'middle'});
+  });
+  // fibre trunk label between ISP and edge
+  const a = pts[2], b = pts[3];
+  const mx = (a[0]+b[0])/2, my = (a[1]+b[1])/2;
+  label(s.g, mx - 10, my - 48, 'fibre trunk', {fill:C.ink, anchor:'middle'});
+  label(s.g, mx - 10, my - 36, '≈ 200,000 km/s · 2/3 c', {size:8.5, anchor:'middle'});
+  label(s.g, mx - 10, my - 24, '1,200 km ≈ 6 ms', {size:8.5, anchor:'middle', cls:'nerd-only'});
+  const w = wire(s.g, pathThrough(pts), {sw:1.2});
+  s.streams.push(new Stream(s.g, w, charsOf(TOK), {speed:70, n:20}));
+  // packet callout near start
+  el('rect', {x:60, y:392, width:150, height:34, fill:C.paper, stroke:C.grid}, s.g);
+  label(s.g, 68, 406, 'one encrypted packet stream', {size:8.5, fill:C.ink});
+  label(s.g, 68, 419, 'contents unreadable in transit', {size:8.5});
+  // gateway checks
+  const gx = 500, gy = 130;
+  el('rect', {x:gx, y:gy, width:270, height:96, fill:C.paper, stroke:C.ink}, s.g);
+  el('rect', {x:gx, y:gy, width:270, height:20, fill:C.ink}, s.g);
+  text(s.g, gx + 10, gy + 14, 'gateway · before any GPU is touched', {size:9.5, fill:C.paper, weight:500});
+  const checks = ['decrypt TLS', 'API key → org · tier', 'rate limit · req/min · tok/min', 'route → region with model loaded'];
+  checks.forEach((c, i) => {
+    el('rect', {x:gx + 10, y:gy + 30 + i*16, width:8, height:8, fill:C.green}, s.g);
+    text(s.g, gx + 24, gy + 37.5 + i*16, c, {size:9.5});
+  });
+  wire(s.g, pathThrough([[pts[4][0], pts[4][1] - 6], [pts[4][0], gy + 96]]), {dash:'3 4', stroke:C.muted});
+  // total latency
+  label(s.g, 36, 110, 'one-way latency', {fill:C.ink});
+  text(s.g, 36, 140, '20–80 ms', {size:24, weight:500, sans:true});
+  label(s.g, 36, 156, 'the smallest slice of what you wait for', {size:8.5});
+  label(s.g, 36, 188, 'anycast: same IP announced from many edges', {size:8.5, cls:'nerd-only'});
+  label(s.g, 36, 200, 'routing takes you to the nearest one', {size:8.5, cls:'nerd-only'});
+}
+
+/* 3 · data center */
+function scene3(s){
+  frameTitle(s, '03', 'The data center', 'A scheduler picks a replica with room. Your request (green) is merged with strangers\' requests into one batch, so one pass through the model serves dozens of people.');
+  const ox = 430, oy = 250;
+  cube(s.g, ox, oy, 0, 0, 0, 340, 230, 0, {top:C.floor, stroke:C.rule});
+  const racks = [];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) racks.push({x: 26 + c*52, y: 24 + r*54, r:r, c:c});
+  racks.sort((a,b) => (a.x + a.y) - (b.x + b.y));
+  let target = null;
+  racks.forEach(k => {
+    const hot = k.r === 2 && k.c === 3;
+    const g = cube(s.g, ox, oy, k.x, k.y, 0, 30, 18, 40, hot ? {top:C.green} : {});
+    if (hot) target = g.topCenter;
+  });
+  // floor labels (bottom-left, clear of the floor)
+  label(s.g, 36, 500, 'rows of racks · 8 GPUs per node · ~120 kW per rack', {size:8.5});
+  label(s.g, 36, 512, 'liquid cooled · replicas of the model loaded on many', {size:8.5});
+  label(s.g, 36, 534, 'continuous batching: requests join and leave', {size:8.5, cls:'nerd-only'});
+  label(s.g, 36, 546, 'between decode steps, no waiting for the slowest', {size:8.5, cls:'nerd-only'});
+  // scheduler
+  const sch = cube(s.g, ox, oy, -120, 190, 0, 40, 40, 30, {top:C.paper});
+  label(s.g, sch.topCenter[0], sch.topCenter[1] + 62, 'scheduler', {fill:C.ink, anchor:'middle'});
+  label(s.g, sch.topCenter[0], sch.topCenter[1] + 74, 'load balancer', {size:8.5, anchor:'middle'});
+  // incoming wires
+  const inY = [232, 268, 330];
+  const you = wire(s.g, pathThrough([[40, inY[1]], [sch.topCenter[0] - 40, inY[1]], sch.topCenter]), {stroke:C.greenInk, sw:1.2});
+  const o1 = wire(s.g, pathThrough([[40, inY[0]], [sch.topCenter[0] - 60, inY[0]], sch.topCenter]), {stroke:C.muted, dash:'2 3'});
+  const o2 = wire(s.g, pathThrough([[40, inY[2]], [sch.topCenter[0] - 40, inY[2]], sch.topCenter]), {stroke:C.muted, dash:'2 3'});
+  label(s.g, 40, inY[0] - 6, 'other users', {size:8.5});
+  label(s.g, 40, inY[1] - 6, 'yours', {size:8.5, fill:C.greenInk});
+  label(s.g, 40, inY[2] - 6, 'other users', {size:8.5});
+  s.streams.push(new Stream(s.g, you, charsOf(TOK), {speed:60}));
+  s.streams.push(new Stream(s.g, o1, ['a','b','c','d','e','f','g','h'], {speed:45, fill:C.muted}));
+  s.streams.push(new Stream(s.g, o2, ['0','1','1','0','1','0','0','1'], {speed:40, fill:C.muted}));
+  const toRack = wire(s.g, pathThrough([sch.topCenter, [sch.topCenter[0], target[1] - 60], [target[0], target[1] - 60], target]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
+  s.streams.push(new Stream(s.g, toRack, charsOf(TOK).concat(['a','b','0','1']), {speed:60, n:10}));
+  // stats
+  const sx = 36, sy = 90;
+  label(s.g, sx, sy, 'this request', {fill:C.ink});
+  const stats = [['replica', '27 / 64'], ['batch', '48 requests'], ['queue', '3 ms'], ['one pass', 'serves all 48']];
+  stats.forEach((st, i) => {
+    label(s.g, sx, sy + 22 + i*20, st[0], {size:8.5});
+    text(s.g, sx + 70, sy + 22 + i*20, st[1], {size:11, weight:500});
+  });
+  // building label
+  label(s.g, 700, 96, '100 MW – 1 GW site', {anchor:'end', fill:C.ink});
+  label(s.g, 700, 108, 'you touch one rack for ~1 s', {anchor:'end', size:8.5});
+}
+
+/* 4 · GPU node */
+function scene4(s){
+  frameTitle(s, '04', 'The GPU node', 'Eight GPUs in one server, each holding one eighth of the weights in high-bandwidth memory, joined by NVLink so they act as one chip. Every output token means reading all of it once.');
+  const ox = 450, oy = 230;
+  cube(s.g, ox, oy, 0, 0, 0, 300, 190, 6, {top:'#F8FAF8', stroke:C.rule});
+  const items = [];
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++){
+    const x = 18 + c*70, y = 25 + r*95;
+    items.push({kind:'gpu', x:x, y:y, i: r*4 + c});
+    items.push({kind:'hbm', x:x + 48, y:y + 2});
+    items.push({kind:'hbm', x:x + 48, y:y + 24});
+  }
+  items.push({kind:'sw', x:130, y:84});
+  items.sort((a,b) => (a.x + a.y) - (b.x + b.y));
+  const gpuTops = [];
+  let swTop = null;
+  items.forEach(it => {
+    if (it.kind === 'gpu'){
+      const g = cube(s.g, ox, oy, it.x, it.y, 6, 42, 42, 10, {top:C.paper});
+      gpuTops[it.i] = g.topCenter;
+      text(s.g, g.topCenter[0], g.topCenter[1] + 2, 'GPU ' + it.i, {size:8, anchor:'middle', weight:500});
+      text(s.g, g.topCenter[0], g.topCenter[1] + 12, 'W ' + (it.i+1) + '/8', {size:7.5, anchor:'middle', fill:C.greenInk});
+    } else if (it.kind === 'hbm'){
+      cube(s.g, ox, oy, it.x, it.y, 6, 10, 16, 24, {top:C.greenTint, left:'#E4F6EA', right:'#CDEAD8'});
+    } else {
+      const g = cube(s.g, ox, oy, it.x, it.y, 6, 40, 22, 8, {top:C.ink, left:'#2A332D', right:'#1A211C', stroke:C.ink});
+      swTop = g.topCenter;
+    }
+  });
+  // nvlink lines + pulses
+  const pulses = [];
+  gpuTops.forEach((p, i) => {
+    el('line', {x1:p[0], y1:p[1], x2:swTop[0], y2:swTop[1], stroke:C.greenInk, 'stroke-width':1, opacity:0.8}, s.g);
+    const c = el('circle', {r:2.4, fill:C.greenInk}, s.g);
+    pulses.push({c:c, a:p, b:swTop, ph:i*0.13});
+  });
+  s.anims.push(t => pulses.forEach(p => {
+    let u = (t*0.55 + p.ph) % 1; if (u > 0.5) u = 1 - u; u *= 2;
+    p.c.setAttribute('cx', (p.a[0] + (p.b[0]-p.a[0])*u).toFixed(1));
+    p.c.setAttribute('cy', (p.a[1] + (p.b[1]-p.a[1])*u).toFixed(1));
+  }));
+  label(s.g, 400, 560, 'green stacks: HBM beside each GPU · black: NVLink switch', {size:8.5});
+  // stats left
+  const sx = 36;
+  label(s.g, sx, 96, 'one node', {fill:C.ink});
+  text(s.g, sx, 128, '8 × GPU', {size:24, weight:500, sans:true});
+  const rows = [
+    ['HBM', '144–288 GB per GPU · 5–8 TB/s'],
+    ['NVLink', '≈ 1.8 TB/s per GPU'],
+    ['weights', '≈ 400 GB at FP8'],
+    ['per GPU', '≈ 50 GB · one eighth']
+  ];
+  rows.forEach((r, i) => {
+    label(s.g, sx, 158 + i*20, r[0], {size:8.5});
+    text(s.g, sx + 60, 158 + i*20, r[1], {size:10.5, weight:500});
+  });
+  label(s.g, sx, 252, 'each output token re-reads all 400 GB', {size:8.5, fill:C.pinkInk});
+  label(s.g, sx, 264, 'memory-bound, not compute-bound', {size:8.5, fill:C.pinkInk});
+  label(s.g, sx, 290, 'tensor parallel: each layer split 8 ways,', {size:8.5, cls:'nerd-only'});
+  label(s.g, sx, 302, 'all-reduce over NVLink after every layer', {size:8.5, cls:'nerd-only'});
+  label(s.g, sx, 314, 'at batch 64, one read of weights → 64 tokens', {size:8.5, cls:'nerd-only'});
+}
+
+/* 5 · prefill */
+function scene5(s){
+  frameTitle(s, '05', 'Prefill', 'All prompt tokens are processed at once, layer by layer. Each token attends to every earlier one, and its keys and values are written to the KV cache so the question is never re-read.');
+  label(s.g, 36, 92, 'your ' + TOK.length + ' tokens · processed in parallel', {fill:C.ink});
+  const row = chipRow(s.g, 36, 150, TOK, 770, {id:false, fill:C.greenTint, stroke:C.greenInk});
+  const chips = row.chips;
+  // attention arcs from last token to previous ones in same row
+  const last = chips[chips.length - 1];
+  const arcs = el('g', {}, s.g);
+  chips.forEach((c, j) => {
+    if (c === last || c.y !== last.y) return;
+    const x1 = c.cx, x2 = last.cx, dx = x2 - x1;
+    const hgt = Math.min(46, 10 + dx*0.12);
+    const w = 0.35 + 0.65*(((tokId(TOK[j]) % 7) / 7));
+    el('path', {d: 'M' + x1 + ' ' + (c.y) + ' Q ' + ((x1+x2)/2) + ' ' + (c.y - hgt) + ' ' + x2 + ' ' + last.y,
+      fill:'none', stroke:C.ink, 'stroke-width': (0.5 + w*1.2).toFixed(2), opacity: (0.25 + w*0.6).toFixed(2)}, arcs);
+  });
+  label(s.g, 36, row.bottom + 14, 'attention: the last token weighs every earlier token · line weight = weight', {size:8.5});
+  label(s.g, 36, row.bottom + 26, 'softmax(Q_i · K_j / √d) · causal, j ≤ i', {size:8.5, cls:'nerd-only'});
+
+  // KV grid
+  const rowsN = 12, n = TOK.length;
+  const gx = 72, gy = Math.max(300, row.bottom + 60), cw = Math.min(26, Math.floor(470 / n)), ch = 17;
+  label(s.g, 36, gy - 12, 'KV cache · one row per layer · one column per token', {fill:C.ink});
+  const cells = [];
+  for (let r = 0; r < rowsN; r++){
+    label(s.g, gx - 6, gy + r*ch + 12, 'L' + (r+1), {size:8, anchor:'end'});
+    cells[r] = [];
+    for (let c = 0; c < n; c++){
+      cells[r][c] = el('rect', {x: gx + c*cw, y: gy + r*ch, width: cw - 1, height: ch - 1, fill:C.paper, stroke:C.grid, 'stroke-width':0.6}, s.g);
+    }
+  }
+  label(s.g, gx - 6, gy + rowsN*ch + 12, '… of 80', {size:8, anchor:'end'});
+  el('rect', {x: gx, y: gy + rowsN*ch + 4, width: n*cw - 1, height: 3, fill:C.grid}, s.g);
+  let lastRow = -1;
+  const period = rowsN*0.16 + 1.8;
+  s.anims.push(t => {
+    const tt = t % period;
+    const filled = Math.min(rowsN, Math.floor(tt / 0.16) + (tt >= rowsN*0.16 ? 1 : 0));
+    if (filled === lastRow) return;
+    lastRow = filled;
+    for (let r = 0; r < rowsN; r++) for (let c = 0; c < n; c++) cells[r][c].setAttribute('fill', r < filled ? C.green : C.paper);
+  });
+  // right column facts
+  const rx = 560, ry = gy;
+  label(s.g, rx, ry + 6, 'written this pass', {fill:C.ink});
+  text(s.g, rx, ry + 38, (n * KV_PER_TOK / 1048576).toFixed(1) + ' MB', {size:24, weight:500, sans:true});
+  label(s.g, rx, ry + 54, n + ' tok × 320 KB per token', {size:8.5});
+  label(s.g, rx, ry + 84, 'same for 100k tokens', {size:8.5});
+  text(s.g, rx, ry + 106, '≈ 32 GB', {size:18, weight:500, sans:true});
+  label(s.g, rx, ry + 122, 'on top of the weights', {size:8.5});
+  label(s.g, rx, ry + 150, 'time to first token', {size:8.5});
+  text(s.g, rx, ry + 170, '0.2 – 2 s', {size:18, weight:500, sans:true});
+  label(s.g, rx, ry + 186, '2 × 80 layers × 8 heads × 128 × 2 B', {size:8, cls:'nerd-only'});
+  label(s.g, rx, ry + 198, 'compute-bound · grows with prompt', {size:8, cls:'nerd-only'});
+}
+
+/* 6 · decode */
+function scene6(s){
+  frameTitle(s, '06', 'Decode', 'One loop per token: read the cache, score the vocabulary, sample one, append it to the cache (pink), push it down the wire. The answer types out while the model is still writing.');
+  const n = TOK.length, A = ANS.length, total = n + A, rowsN = 12;
+  const gx = 64, gy = 128, cw = Math.max(3, Math.min(9, Math.floor(230 / total))), ch = 12;
+  label(s.g, 36, 96, 'KV cache', {fill:C.ink});
+  label(s.g, 36, 108, 'green: prompt · pink: generated so far', {size:8.5});
+  const cols = [];
+  for (let c = 0; c < total; c++){
+    cols[c] = [];
+    for (let r = 0; r < rowsN; r++){
+      cols[c][r] = el('rect', {x: gx + c*cw, y: gy + r*ch, width: Math.max(1.5, cw - 1), height: ch - 1,
+        fill: c < n ? C.green : C.paper, stroke: c < n ? null : C.grid, 'stroke-width':0.5}, s.g);
+    }
+  }
+  for (let r = 0; r < rowsN; r++) label(s.g, gx - 5, gy + r*ch + 9, 'L' + (r+1), {size:7, anchor:'end'});
+  const counter = text(s.g, 36, gy + rowsN*ch + 28, '', {size:11, weight:500});
+  label(s.g, 36, gy + rowsN*ch + 42, 'cache grows by 320 KB per token', {size:8.5, cls:'nerd-only'});
+
+  // sampling panel
+  const px = 320, py = 96;
+  label(s.g, px, py, 'next token · top of the vocabulary', {fill:C.ink});
+  el('rect', {x:px, y:py + 10, width:200, height:150, fill:C.paper, stroke:C.ink}, s.g);
+  const barG = el('g', {}, s.g);
+  label(s.g, px, py + 176, 'temperature 1.0 · top-p 0.95', {size:8.5, cls:'nerd-only'});
+  label(s.g, px, py + 188, 'logits → softmax → sample one id', {size:8.5, cls:'nerd-only'});
+
+  // answer card
+  const ax = 550, ay = 96;
+  label(s.g, ax, ay, 'the answer, so far', {fill:C.ink});
+  el('rect', {x:ax, y:ay + 10, width:220, height:210, fill:C.paper, stroke:C.ink}, s.g);
+  const ansG = el('g', {}, s.g);
+  const rate = text(s.g, ax + 210, ay + 210, '', {size:9, anchor:'end', fill:C.muted});
+
+  // return wire to device
+  const dev = cube(s.g, 150, 450, 0, 0, 0, 40, 40, 22, {});
+  label(s.g, 150, 510, 'your device', {anchor:'middle', fill:C.ink});
+  const back = wire(s.g, pathThrough([[ax + 110, ay + 222], [ax + 110, 400], [150, 400], dev.topCenter]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink'});
+  const st = new Stream(s.g, back, charsOf(ANS), {speed:75, fill:C.pinkInk, n:18});
+  s.streams.push(st);
+  label(s.g, 330, 420, 'streamed back as server-sent events · each token as soon as it exists', {size:8.5, fill:C.pinkInk});
+
+  const stepDur = 0.14, period = (A + 12) * stepDur;
+  let lastK = -1;
+  function draw(k){
+    // cache columns
+    for (let c = n; c < total; c++){
+      const on = (c - n) < k;
+      for (let r = 0; r < rowsN; r++){
+        cols[c][r].setAttribute('fill', on ? C.pink : C.paper);
+        cols[c][r].setAttribute('stroke', on ? 'none' : C.grid);
+      }
+    }
+    counter.textContent = 'token ' + Math.min(k, A) + ' / ' + A + ' · cache ' + fmt(n + Math.min(k,A)) + ' tok';
+    // bars
+    while (barG.firstChild) barG.removeChild(barG.firstChild);
+    const idx = Math.min(k, A - 1);
+    const chosen = ANS[idx];
+    const seed = tokId(chosen);
+    const p0 = 0.32 + (seed % 40) / 100;
+    const cands = [[chosen, p0]];
+    let rest = 1 - p0;
+    for (let i = 0; i < 4; i++){
+      const d = DISTRACT[(seed + i*3) % DISTRACT.length];
+      const p = rest * (0.45 - i*0.08);
+      cands.push([d, p]); rest -= p;
+    }
+    cands.sort((a,b) => b[1] - a[1]);
+    cands.forEach((c, i) => {
+      const by = py + 26 + i*27;
+      const isC = c[0] === chosen;
+      text(barG, px + 10, by + 11, disp(c[0]), {size:9.5, weight: isC ? 500 : 400, fill: isC ? C.pinkInk : C.ink});
+      el('rect', {x: px + 70, y: by + 2, width: 100, height: 12, fill:C.ground}, barG);
+      el('rect', {x: px + 70, y: by + 2, width: (100*c[1]).toFixed(1), height: 12, fill: isC ? C.pink : C.grid}, barG);
+      text(barG, px + 190, by + 11, (c[1]*100).toFixed(0) + '%', {size:8.5, anchor:'end', fill:C.muted});
+    });
+    if (k >= A) text(barG, px + 100, py + 150, 'stop_reason: end_turn', {size:9, anchor:'middle', fill:C.greenInk});
+    // answer text
+    while (ansG.firstChild) ansG.removeChild(ansG.firstChild);
+    const str = ANS.slice(0, Math.min(k, A)).join('');
+    const ls = wrap(str, 36);
+    ls.forEach((l, i) => text(ansG, ax + 12, ay + 32 + i*15, l, {size:10.5, sans:true}));
+    if (k < A){
+      const lastLine = ls[ls.length-1] || '';
+      el('rect', {x: ax + 12 + lastLine.length*5.35, y: ay + 22 + Math.max(0, ls.length-1)*15, width:5, height:12, fill:C.pink}, ansG);
+    }
+    rate.textContent = k < A ? '≈ 70 tok/s' : Math.min(k,A) + ' tokens · ' + (A/70).toFixed(1) + ' s';
+  }
+  s.anims.push(t => {
+    const k = Math.floor((t % period) / stepDur);
+    if (k === lastK) return;
+    lastK = k; draw(k);
+  });
+  draw(reduce ? A : 0);
+}
+
+/* 7 · screen */
+function scene7(s){
+  frameTitle(s, '07', 'Back on your screen', 'The app appends each event\'s fragment to the bubble and renders formatting as it becomes clear. The last event carries why the model stopped and how many tokens were used.');
+  const ox = 230, oy = 400;
+  cube(s.g, ox, oy, 0, 0, 0, 300, 110, 10, {top:'#F8FAF8'});
+  const plane = screenPlane(s.g, ox, oy, 0, 0, 10, 300, 180);
+  // user bubble (right)
+  const ul = wrap(PROMPT, 34).slice(0, 3);
+  const ubH = 10 + ul.length*10.5;
+  el('rect', {x:120, y:12, width:170, height:ubH, rx:3, fill:C.greenTint, stroke:C.greenInk, 'stroke-width':0.6}, plane);
+  lines(plane, 128, 23, ul, {size:7.5, sans:true, lh:10.5});
+  // assistant bubble
+  const al = wrap(ANSWER, 58);
+  const abY = 12 + ubH + 10;
+  el('rect', {x:10, y:abY, width:280, height:16 + al.length*10.5, rx:3, fill:C.ground, stroke:C.grid}, plane);
+  lines(plane, 18, abY + 12, al, {size:7.5, sans:true, lh:10.5});
+  label(s.g, 36, 250, 'your device', {fill:C.ink});
+  label(s.g, 36, 262, 'rendering the stream', {size:8.5});
+  // SSE feed
+  const fx = 520, fy = 96;
+  label(s.g, fx, fy, 'server-sent events · text/event-stream', {fill:C.ink});
+  el('rect', {x:fx, y:fy + 10, width:250, height:150, fill:C.paper, stroke:C.ink}, s.g);
+  const feed = el('g', {}, s.g);
+  const A = ANS.length;
+  let lastK = -1;
+  s.anims.push(t => {
+    const k = Math.floor(t / 0.22) % (A + 6);
+    if (k === lastK) return; lastK = k;
+    while (feed.firstChild) feed.removeChild(feed.firstChild);
+    for (let j = 0; j < 6; j++){
+      const idx = k - 5 + j;
+      const y = fy + 32 + j*23;
+      if (idx < 0) continue;
+      if (idx < A){
+        text(feed, fx + 10, y, 'event: content_block_delta', {size:8, fill:C.muted});
+        text(feed, fx + 10, y + 10, 'data: {"text": ' + JSON.stringify(ANS[idx]) + '}', {size:8.5, fill: j === 5 ? C.pinkInk : C.ink});
+      } else if (idx === A){
+        text(feed, fx + 10, y, 'event: message_delta', {size:8, fill:C.muted});
+        text(feed, fx + 10, y + 10, 'data: {"stop_reason": "end_turn"}', {size:8.5, fill:C.greenInk});
+      } else if (idx === A + 1){
+        text(feed, fx + 10, y, 'event: message_stop', {size:8, fill:C.muted});
+        text(feed, fx + 10, y + 10, 'usage: {"input": ' + fmt(SYSTEM_TOK + HISTORY_TOK + TOK.length) + ', "output": ' + A + '}', {size:8.5, fill:C.greenInk});
+      }
+    }
+  });
+  // arrow from feed to screen
+  const w = wire(s.g, pathThrough([[fx, fy + 85], [fx - 24, fy + 85], [fx - 24, 300], [ox + 300*0.866 + 4, 300]]), {stroke:C.pinkInk, dash:'3 4', arrow:'arr-pink'});
+  // stats
+  label(s.g, fx, 290, 'this reply', {fill:C.ink});
+  const rows = [['stop_reason', 'end_turn'], ['input tokens', fmt(SYSTEM_TOK + HISTORY_TOK + TOK.length)], ['output tokens', String(A)], ['time to first token', '≈ 380 ms'], ['total', '≈ ' + (0.38 + A/70).toFixed(1) + ' s']];
+  rows.forEach((r, i) => {
+    label(s.g, fx, 312 + i*20, r[0], {size:8.5});
+    text(s.g, fx + 250, 312 + i*20, r[1], {size:10.5, weight:500, anchor:'end'});
+  });
+  label(s.g, fx, 420, 'deltas are text fragments, not always whole', {size:8, cls:'nerd-only'});
+  label(s.g, fx, 432, 'tokens · markdown re-parsed on every one', {size:8, cls:'nerd-only'});
+  label(s.g, fx, 444, 'usage is what the bill is based on', {size:8, cls:'nerd-only'});
+}
+
+/* 8 · next turn */
+function scene8(s){
+  frameTitle(s, '08', 'Your next question', 'The app re-sends the whole transcript. The server matches the unchanged prefix against its cache and skips its prefill (green); only the new question (pink) is processed. The model itself keeps nothing.');
+  const n = TOK.length, A = ANS.length, f = FUP.length;
+  const total = SYSTEM_TOK + n + A + f;
+  const ox = 250, oy = 330;
+  const slabs = [
+    {name:'system prompt', tok:SYSTEM_TOK, top:C.paper},
+    {name:'user ① · turn 1', tok:n, top:C.greenTint},
+    {name:'assistant ①', tok:A, top:C.paper},
+    {name:'user ② · new', tok:f, top:C.pink}
+  ];
+  label(s.g, 36, 96, 'what your app sends on turn 2', {fill:C.ink});
+  slabs.forEach((sl, i) => {
+    const z = i*24;
+    cube(s.g, ox, oy, 0, 0, z, 150, 90, 14, {top:sl.top});
+    const corner = P(ox, oy, 0, 90, z + 7);
+    el('line', {x1:corner[0] - 4, y1:corner[1], x2:corner[0] - 26, y2:corner[1], stroke:C.rule}, s.g);
+    label(s.g, corner[0] - 30, corner[1] - 2, sl.name, {anchor:'end', fill: i === 3 ? C.pinkInk : C.ink, size:9});
+    label(s.g, corner[0] - 30, corner[1] + 9, fmt(sl.tok) + ' tok', {anchor:'end', size:8});
+  });
+  label(s.g, 36, 470, 'the follow-up', {size:8.5});
+  text(s.g, 36, 488, '"' + FOLLOWUP + '"', {size:11, sans:true});
+  label(s.g, 36, 506, 'the model has no memory of turn 1', {size:8.5, fill:C.pinkInk});
+  // wire to server
+  const start = P(ox, oy, 150, 0, 4*24 + 4);
+  const rx = 440, bary = 150;
+  const w = wire(s.g, pathThrough([start, [start[0] + 26, start[1]], [start[0] + 26, bary + 15], [rx - 4, bary + 15]]), {arrow:'arr'});
+  s.streams.push(new Stream(s.g, w, charsOf(TOK).concat(charsOf(FUP)), {speed:60, n:12}));
+  const tl = label(s.g, 0, 0, 'whole transcript re-sent · ' + fmt(total) + ' tok', {size:8.5, anchor:'middle'});
+  tl.setAttribute('transform', 'translate(' + (start[0] + 40) + ' ' + ((start[1] + bary + 15)/2) + ') rotate(-90)');
+  // kv bar
+  const bw = 330;
+  const frac = (total - f) / total;
+  label(s.g, rx, bary - 12, 'server · KV cache for this request', {fill:C.ink});
+  const hit = el('rect', {x:rx, y:bary, width:(bw*frac).toFixed(1), height:30, fill:C.green, stroke:C.ink}, s.g);
+  el('rect', {x:rx + bw*frac, y:bary, width:(bw*(1-frac)).toFixed(1), height:30, fill:C.pink, stroke:C.ink}, s.g);
+  text(s.g, rx + 8, bary + 19, 'PREFIX · ' + fmt(total - f) + ' tok · CACHE HIT · prefill skipped', {size:8.5, weight:500, fill:C.ink, ls:0.4});
+  label(s.g, rx + bw, bary + 44, 'new · ' + f + ' tok · prefill', {anchor:'end', size:8.5, fill:C.pinkInk});
+  label(s.g, rx, bary + 44, 'exact match on the token prefix', {size:8.5, cls:'nerd-only'});
+  s.anims.push(t => hit.setAttribute('fill-opacity', (0.7 + 0.3*Math.sin(t*3)).toFixed(2)));
+  // turn comparison
+  const cy = 240;
+  label(s.g, rx, cy, 'time to first token', {fill:C.ink});
+  const cmp = [['turn 1 · no cache', total - f, '≈ 400 ms', C.grid], ['turn 2 · cache hit', f, '≈ 90 ms', C.pink]];
+  cmp.forEach((c, i) => {
+    const y = cy + 16 + i*34;
+    label(s.g, rx, y + 4, c[0], {size:8.5});
+    el('rect', {x:rx, y:y + 9, width:bw, height:10, fill:C.paper, stroke:C.grid}, s.g);
+    el('rect', {x:rx, y:y + 9, width:(i === 0 ? bw*0.92 : bw*0.2).toFixed(1), height:10, fill:c[3]}, s.g);
+    text(s.g, rx + bw, y + 4, c[2] + ' · prefill ' + fmt(c[1]) + ' tok', {size:9, anchor:'end', weight:500});
+  });
+  // context window
+  const wy = 340;
+  label(s.g, rx, wy, 'context window · 200,000 tok', {fill:C.ink});
+  el('rect', {x:rx, y:wy + 10, width:bw, height:14, fill:C.paper, stroke:C.ink}, s.g);
+  el('rect', {x:rx, y:wy + 10, width:Math.max(6, bw*total/200000).toFixed(1), height:14, fill:C.green}, s.g);
+  text(s.g, rx + bw, wy, fmt(total) + ' used · ' + (100*total/200000).toFixed(1) + '%', {size:9, anchor:'end', weight:500});
+  label(s.g, rx, wy + 38, 'grows every turn · when full: summarize or drop old turns', {size:8.5});
+  // what persists
+  const py = 420;
+  label(s.g, rx, py, 'what persists after this call', {fill:C.ink});
+  const per = [['your app', 'the transcript', C.ink], ['server', 'cached prefix · ~5 min TTL', C.greenInk], ['the model', 'nothing', C.pinkInk]];
+  per.forEach((p, i) => {
+    const y = py + 20 + i*18;
+    el('rect', {x:rx, y:y - 8, width:8, height:8, fill:p[2]}, s.g);
+    label(s.g, rx + 16, y, p[0], {size:8.5});
+    text(s.g, rx + 100, y, p[1], {size:10.5, weight:500, fill:p[2]});
+  });
+  label(s.g, rx, py + 84, 'cache reads bill at ~10% of input price', {size:8, cls:'nerd-only'});
+  label(s.g, rx, py + 96, 'a changed byte in the prefix defeats the cache', {size:8, cls:'nerd-only'});
+}
+
+const BUILDERS = [scene1, scene2, scene3, scene4, scene5, scene6, scene7, scene8];
+
+function buildAll(){
+  while (scenesRoot.firstChild) scenesRoot.removeChild(scenesRoot.firstChild);
+  scenes.length = 0;
+  BUILDERS.forEach((b, i) => makeScene(i, b));
+  applyActive();
+}
+
+/* ---------------- activation + loop ---------------- */
+let active = 0, tActive = 0;
+const navLinks = Array.from(document.querySelectorAll('#depth-nav a'));
+function applyActive(){
+  scenes.forEach((s, i) => s.g.classList.toggle('active', i === active));
+  navLinks.forEach((a, i) => { if (i === active) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current'); });
+  if (reduce){ const s = scenes[active]; if (s){ s.streams.forEach(st => st.tick(0)); s.anims.forEach(a => a(7.3, 0)); } }
+}
+function setActive(i){
+  if (i === active) return;
+  active = i; tActive = 0; applyActive();
+}
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; tActive += dt;
+  const s = scenes[active];
+  if (s && !reduce){ s.streams.forEach(st => st.tick(dt)); s.anims.forEach(a => a(tActive, dt)); }
+  requestAnimationFrame(loop);
+}
+
+const steps = Array.from(document.querySelectorAll('.step'));
+let ticking = false;
+function onScroll(){
+  if (ticking) return; ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    const vh = window.innerHeight, pivot = vh * 0.5;
+    let idx = 0;
+    steps.forEach((st, i) => { if (st.getBoundingClientRect().top <= pivot) idx = i; });
+    setActive(idx);
+  });
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+window.addEventListener('resize', onScroll);
+
+/* depth toggle */
+const depthBtns = Array.from(document.querySelectorAll('.depth button'));
+function setDepth(d){
+  document.body.dataset.depth = d;
+  depthBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.depth === d)));
+  try { localStorage.setItem('prt-depth', d); } catch(e){}
+}
+depthBtns.forEach(b => b.addEventListener('click', () => setDepth(b.dataset.depth)));
+try { const saved = localStorage.getItem('prt-depth'); if (saved === 'nerd' || saved === 'simple') setDepth(saved); } catch(e){}
+
+/* prompt editing */
+const input = document.getElementById('prompt');
+const count = document.getElementById('tokcount');
+let deb = null;
+function onPrompt(){
+  const v = input.value.trim();
+  if (!v) return;
+  PROMPT = v; TOK = tokenize(PROMPT);
+  count.textContent = TOK.length + ' tokens';
+  buildAll();
+}
+input.addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(onPrompt, 250); });
+count.textContent = TOK.length + ' tokens';
+
+buildAll();
+onScroll();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
