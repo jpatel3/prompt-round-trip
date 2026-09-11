@@ -196,6 +196,18 @@ section.after h3.sub{font-weight:500;font-size:18px;letter-spacing:-.01em;margin
 .risk-low{background:var(--green-tint);color:var(--green-ink)}
 .risk-real{background:var(--pink-tint);color:var(--pink-ink)}
 .privacy-grid .fine{font-size:13px;color:var(--muted);margin:18px 0 0}
+.pipeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:1px solid var(--ink);background:var(--paper)}
+.pipe-step{padding:18px 16px 20px;position:relative}
+.pipe-step + .pipe-step{border-left:1px solid var(--grid)}
+.pipe-step + .pipe-step::before{content:"";position:absolute;left:-1px;top:26px;width:0;height:0;border:5px solid transparent;border-left:7px solid var(--ink);transform:translateX(-1px)}
+.pipe-num{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;background:var(--pink);color:var(--ink);padding:2px 7px;margin-bottom:10px}
+.pipe-step:nth-child(3) .pipe-num{background:var(--green)}
+.pipe-step h4{font-weight:500;font-size:15px;letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+.pipe-step p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.5}
+.pipe-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:16px}
+.pipe-notes p{font-size:14px;color:var(--ink-2);margin:0}
+@media (max-width: 1100px){.pipeline{grid-template-columns:repeat(3,minmax(0,1fr))}.pipe-step:nth-child(4){border-left:0}.pipe-step:nth-child(n+4){border-top:1px solid var(--grid)}.pipe-step:nth-child(4)::before{display:none}}
+@media (max-width: 700px){.pipeline{grid-template-columns:1fr}.pipe-step + .pipe-step{border-left:0;border-top:1px solid var(--grid)}.pipe-step + .pipe-step::before{display:none}.pipe-notes{grid-template-columns:1fr}}
 @media (max-width: 900px){
   .privacy-grid{grid-template-columns:1fr}
   .privacy-grid li, .privacy-grid .checklist li{grid-template-columns:1fr;gap:4px}
@@ -403,8 +415,8 @@ footer li{margin-bottom:6px}
           <span class="tag">Does sharing the batch expose my question?</span>
           <ol>
             <li><b>No, by design</b><span>Requests in a batch share the GPU's arithmetic, not each other's data. Each request has its own KV cache blocks, and attention is masked so a token can only see tokens from its own request. Your answer depends on your tokens and the weights, nothing else.</span></li>
-            <li><b>Nothing is learned</b><span>Weights are frozen during inference. What you type here cannot surface in someone else's answer tomorrow.</span></li>
-            <li><b>The real exposure</b><span>Is not on the GPU. It is in what the provider stores afterwards and what it may train on. <a href="#privacy">See where your data actually is.</a></span></li>
+            <li><b>Nothing is learned now</b><span>Weights are frozen while your request runs. Nothing you type changes the model that is answering, and nothing can cross into another request in the same batch.</span></li>
+            <li><b>But later, maybe</b><span>On free and consumer tiers, unless you opt out, the logged conversation and your reactions to it can be collected and used months later to train a future model version. That is a separate, offline pipeline. <a href="#privacy">See where your data actually goes.</a></span></li>
           </ol>
         </div>
       </article>
@@ -643,10 +655,10 @@ footer li{margin-bottom:6px}
         <h3>Along the journey</h3>
         <ol class="risk">
           <li><b><span class="risk-low">low</span>Step 2 · the wire</b><span>Encrypted in transit, decrypted at the provider's edge. Inside their network it is plaintext. Your trust in the provider begins here.</span></li>
-          <li><b><span class="risk-low">low</span>Steps 3 to 6 · the GPUs</b><span>Your tokens live in GPU memory for the length of the request, in cache blocks only your request can address, then the blocks are freed. Weights do not change, so nothing you send can appear in anyone else's answer.</span></li>
+          <li><b><span class="risk-low">low</span>Steps 3 to 6 · the GPUs</b><span>Your tokens live in GPU memory for the length of the request, in cache blocks only your request can address, then the blocks are freed. Weights do not change during inference, so nothing you send can appear in anyone else's answer from this model. Training, where it happens, is the offline path below.</span></li>
           <li><b><span class="risk-low">low</span>Step 8 · the prefix cache</b><span>Scoped to your account or organization. Another customer's identical prompt does not hit your entries. Researchers have shown timing side channels on shared caches; scoping is the defence.</span></li>
           <li><b><span class="risk-real">real</span>Logs and retention</b><span>Requests and responses are usually stored for a period for abuse monitoring and debugging. Consumer chat history stays until you delete it. API, business and enterprise tiers typically offer short or zero retention. A court order can override deletion, as one did in 2025.</span></li>
-          <li><b><span class="risk-real">real</span>Training</b><span>Consumer tiers may use conversations to improve future models unless you opt out. API and enterprise tiers generally exclude training by contract. Check the setting; do not assume.</span></li>
+          <li><b><span class="risk-real">real</span>Training</b><span>Free and consumer tiers may use conversations, and your reactions to answers, to improve future models unless you opt out. API, business and enterprise tiers generally exclude training by contract. Check the setting; do not assume. The path that data takes is drawn below.</span></li>
           <li><b><span class="risk-real">real</span>Human review</b><span>Under abuse and safety policies, staff can read conversations that are flagged.</span></li>
           <li><b><span class="risk-real">real</span>Memory features</b><span>If the app saves "files jointly, two dependents" as a memory, that fact rides in step 1 of every future request until you delete it.</span></li>
           <li><b><span class="risk-real">real</span>App bugs</b><span>The one well-known cross-user leak, other people's chat titles appearing in a sidebar in 2023, was a web-app caching bug, not the GPU pipeline.</span></li>
@@ -663,6 +675,45 @@ footer li{margin-bottom:6px}
         </ol>
         <p class="fine">Policies and retention windows differ by product and change over time. Verify the current terms of the product you use rather than relying on this page.</p>
       </div>
+    </div>
+
+    <h3 class="sub">If training is on: the offline path your conversation takes</h3>
+    <p class="lede">This is the part the inference journey never shows, because it happens on different machines, weeks or months later. The shape below is the typical pipeline described in provider policies and research papers. Exact stores, windows and filters differ by lab.</p>
+    <div class="pipeline">
+      <div class="pipe-step">
+        <span class="pipe-num">1</span>
+        <h4>Logged at the gateway</h4>
+        <p>The request and the streamed response are written to a logging store, keyed by conversation and account id, with model, timestamps and token counts. This is the same log used for abuse monitoring and debugging. Deleting a chat removes it here, after a delay.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">2</span>
+        <h4>Your reactions join it</h4>
+        <p>Thumbs up or down, "regenerate", copying an answer, editing your question and asking again, choosing between two answers. In coding assistants: whether you accepted, edited or rejected a suggestion. These events are stored as a feedback log tied to the same conversation id.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">3</span>
+        <h4>Eligibility filter</h4>
+        <p>Only conversations whose account and tier permit training pass. Opt-outs, temporary chats, API, business and enterprise traffic are dropped here. This is the gate your settings control.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">4</span>
+        <h4>Scrubbing and sampling</h4>
+        <p>Automated removal of names, emails, numbers that look like identifiers, then deduplication and quality and safety filters. A sample may be read and labelled by reviewers. Your tax return is meant to lose its identifiers here; the figures and the question survive.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">5</span>
+        <h4>Becomes training data</h4>
+        <p>Answers you liked become examples to imitate. Pairs where you preferred one answer over another become preference data for reinforcement learning. Hard cases become evaluation sets. Datasets are versioned and kept under their own retention rules, separate from your chat history.</p>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">6</span>
+        <h4>Baked into a future model</h4>
+        <p>A training run on a separate cluster produces the next model version, released weeks or months later. From then on the influence is diffuse and cannot be removed by deleting the chat. Models rarely reproduce a single conversation, but this is why the gate at step 3 is the one that matters.</p>
+      </div>
+    </div>
+    <div class="pipe-notes">
+      <p><strong>Coding assistants.</strong> Tools such as Cursor and GitHub Copilot have shipped with telemetry that collects prompts, code snippets and accept-or-reject signals unless a privacy mode or opt-out is set, with business tiers excluded by default. Whether that is on for you today is a setting to check, not a fact to assume.</p>
+      <p><strong>What "delete" reaches.</strong> Steps 1 and 2 within the retention window. Not step 5's dataset snapshots once taken, and never step 6.</p>
     </div>
   </div>
 </section>
@@ -1438,7 +1489,7 @@ function scene8(s){
   // what persists
   const py = 420;
   label(s.g, rx, py, 'what persists after this call', {fill:C.ink});
-  const per = [['your app', 'the transcript', C.ink], ['server', 'cached prefix · ~5 min TTL', C.greenInk], ['the model', 'nothing', C.pinkInk]];
+  const per = [['your app', 'the transcript', C.ink], ['server', 'cached prefix · ~5 min TTL · logs', C.greenInk], ['the model', 'nothing · training is offline, later', C.pinkInk]];
   per.forEach((p, i) => {
     const y = py + 20 + i*18;
     el('rect', {x:rx, y:y - 8, width:8, height:8, fill:p[2]}, s.g);
