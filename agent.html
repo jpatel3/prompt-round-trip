@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Round Trip · Agent</title>
+<meta name="description" content="Follow one message to an AI agent you text from your phone: where it is decrypted, what the provider stores, how your calendar and email get copied into the request, the tool loop, the approval gate, and what runs while you sleep.">
+<link rel="canonical" href="https://jpatel3.github.io/prompt-round-trip/agent.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Prompt Round Trip">
+<meta property="og:title" content="When an assistant acts for you">
+<meta property="og:description" content="One text to an AI agent, followed end to end: where encryption ends, what gets stored, how your calendar and email are copied into the request, the tool loop, the approval gate, and what runs while you sleep.">
+<meta property="og:url" content="https://jpatel3.github.io/prompt-round-trip/agent.html">
+<meta property="og:image" content="https://jpatel3.github.io/prompt-round-trip/docs/social-card-agent.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="When an assistant acts for you">
+<meta name="twitter:description" content="One text to an AI agent, followed end to end: encryption, storage, the tool loop, the approval gate, and what runs while you sleep.">
+<meta name="twitter:image" content="https://jpatel3.github.io/prompt-round-trip/docs/social-card-agent.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23F5F8F4'/%3E%3Crect x='10' y='22' width='30' height='12' fill='%23FFA9FD'/%3E%3Crect x='42' y='30' width='12' height='6' fill='%2319E76E'/%3E%3Cpath d='M10 44h44' stroke='%230B0F0C' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+/* agent-page specifics */
+body.agent .eyebrow::before{background:var(--pink)}
+body.agent .eyebrow.green::before{background:var(--green)}
+body.agent .hero h1 .blk{background:var(--green)}
+body.agent .prompt-field .count{background:var(--pink-tint)}
+body.agent .prompt-field input:focus-visible{box-shadow:inset 0 0 0 2px var(--pink)}
+body.agent .depth-nav a[aria-current="step"]::before{background:var(--pink)}
+.connections{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.connections span{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 9px;background:var(--paper)}
+.connections span i{display:inline-block;width:8px;height:8px;background:var(--green);margin-right:7px;vertical-align:0}
+.confusions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border:1px solid var(--ink);background:var(--paper);margin-top:28px}
+.confusions > div{padding:12px 14px;font-size:13px;color:var(--ink-2)}
+.confusions > div + div{border-left:1px solid var(--grid)}
+.confusions b{display:block;font-family:var(--mono);font-weight:500;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+.confusions small{display:block;font-family:var(--mono);font-size:10px;color:var(--pink-ink);margin-top:6px;letter-spacing:.04em}
+@media (max-width: 900px){.confusions{grid-template-columns:1fr}.confusions > div + div{border-left:0;border-top:1px solid var(--grid)}}
+/* data map */
+table.datamap td:first-child{white-space:normal;min-width:140px}
+table.datamap .enc{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;margin-right:6px;vertical-align:1px}
+table.datamap .enc.e2e{background:var(--green-tint);color:var(--green-ink)}
+table.datamap .enc.rest{background:var(--ground);color:var(--ink-2);border:1px solid var(--grid)}
+table.datamap .enc.plain{background:var(--pink-tint);color:var(--pink-ink)}
+/* time */
+.waterfall .seg.deliver{background:var(--ground)}
+.waterfall .seg.fetch{background:#E4E9E5}
+.waterfall .seg.model{background:var(--pink)}
+.waterfall .seg.tool{background:var(--green-tint)}
+.waterfall .seg.you{background:repeating-linear-gradient(135deg,var(--paper) 0 4px,var(--grid) 4px 6px)}
+.waterfall .seg.reply{background:var(--ground)}
+/* answers strip */
+.answers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--ink);background:var(--paper)}
+.answers > div{padding:18px 18px 20px}
+.answers > div + div{border-left:1px solid var(--grid)}
+.answers .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.answers p{font-size:14px;color:var(--ink-2);margin:0;line-height:1.5}
+.answers p b{color:var(--ink);font-weight:600}
+@media (max-width: 1100px){.answers{grid-template-columns:repeat(2,minmax(0,1fr))}.answers > div:nth-child(3){border-left:0}.answers > div:nth-child(n+3){border-top:1px solid var(--grid)}}
+@media (max-width: 700px){.answers{grid-template-columns:1fr}.answers > div + div{border-left:0;border-top:1px solid var(--grid)}}
+</style>
+</head>
+<body class="agent" data-depth="simple">
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="./">Prompt Round Trip</a>
+    <nav class="tabs" aria-label="Journeys">
+      <a href="./"><b>Prompt</b><span>where a question goes</span></a>
+      <a href="agent.html" aria-current="page"><b>Agent</b><span>when an assistant acts for you</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">An explainer · one message to an agent, followed end to end</div>
+      <h1>When an assistant acts for you<span class="blk" aria-hidden="true"></span></h1>
+      <p class="lede">You text an assistant from your messaging app and, a minute later, your calendar has changed and an email has gone out. Between those two moments: a relay, a webhook, a token vault, copies of your calendar and inbox inside a request, four model calls, a question back to you, and two API calls made in your name. This page follows one message the whole way, and answers the five things people are usually unsure about.</p>
+      <div class="confusions" aria-label="The five questions this page answers">
+        <div><b>Stored where</b>Every copy of your data, and which company holds it.<small>steps 2, 3, 7</small></div>
+        <div><b>Encrypted</b>Where "end-to-end" actually ends.<small>steps 1, 2</small></div>
+        <div><b>Human in loop</b>Who approves an action, and who can read the logs.<small>step 6</small></div>
+        <div><b>How long</b>Why a one-line request takes tens of seconds.<small>steps 4, 5</small></div>
+        <div><b>Compute</b>Why one text costs many model calls, including while you sleep.<small>steps 5, 8</small></div>
+      </div>
+    </div>
+    <div class="aside">
+      <div class="prompt-field">
+        <label class="eyebrow" for="prompt">The message we'll follow</label>
+        <div class="field">
+          <input id="prompt" type="text" value="Move my 3 pm with Priya to tomorrow and let her know." spellcheck="false" autocomplete="off" maxlength="160">
+          <span class="count" id="tokcount">14 tokens</span>
+        </div>
+        <p class="hint">Edit it. The agent's plan below stays the same; the tokens on the wires follow your words.</p>
+        <div class="connections" aria-label="Connected accounts in this example"><span><i></i>Calendar</span><span><i></i>Email</span><span><i></i>Sentry</span></div>
+      </div>
+      <div class="depth" role="group" aria-label="Explanation depth">
+        <span class="seg">
+          <button type="button" data-depth="plain" aria-pressed="false">Plain</button>
+          <button type="button" data-depth="simple" aria-pressed="true">Simple</button>
+          <button type="button" data-depth="nerd" aria-pressed="false">Nerd</button>
+        </span>
+        <span class="note">Plain has no jargon. Nerd adds protocols, sizes and policy detail.</span>
+      </div>
+      <div class="depth" role="group" aria-label="Diagram text size">
+        <span class="seg textsize">
+          <button type="button" data-fs="1" aria-pressed="true" aria-label="Diagram text: normal">A</button>
+          <button type="button" data-fs="1.25" aria-pressed="false" aria-label="Diagram text: larger">A<sup>+</sup></button>
+          <button type="button" data-fs="1.5" aria-pressed="false" aria-label="Diagram text: largest">A<sup>++</sup></button>
+        </span>
+        <span class="note">Diagram text size.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="journey">
+  <div class="wrap">
+    <div class="stage" id="stage-wrap">
+      <ol class="depth-nav" id="depth-nav" aria-label="Steps">
+        <li><a href="#step-1" data-step="1">Message</a></li>
+        <li><a href="#step-2" data-step="2">Inbox</a></li>
+        <li><a href="#step-3" data-step="3">Context</a></li>
+        <li><a href="#step-4" data-step="4">Model</a></li>
+        <li><a href="#step-5" data-step="5">Loop</a></li>
+        <li><a href="#step-6" data-step="6">Approval</a></li>
+        <li><a href="#step-7" data-step="7">Action</a></li>
+        <li><a href="#step-8" data-step="8">Asleep</a></li>
+        <li class="more"><a href="#after-nav">After ↓</a></li>
+      </ol>
+      <div class="step-pill" id="step-pill" aria-live="polite">1 / 8 · Message</div>
+      <svg id="stage" viewBox="0 0 800 640" role="img" aria-label="Animated diagram of the current step in the journey of a message to an AI agent">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0B0F0C"></path></marker>
+          <marker id="arr-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#049A52"></path></marker>
+          <marker id="arr-pink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#B0389F"></path></marker>
+        </defs>
+        <g id="frame">
+          <line x1="24" y1="24" x2="776" y2="24" stroke="#D9D9D9" stroke-width="1"></line>
+          <line x1="24" y1="616" x2="776" y2="616" stroke="#D9D9D9" stroke-width="1"></line>
+          <line x1="24" y1="24" x2="24" y2="616" stroke="#D9D9D9" stroke-width="1"></line>
+          <line x1="776" y1="24" x2="776" y2="616" stroke="#D9D9D9" stroke-width="1"></line>
+        </g>
+        <g id="scenes"></g>
+      </svg>
+    </div>
+
+    <div class="steps" id="steps">
+
+      <article class="step" id="step-1" data-step="1">
+        <div class="eyebrow">Step 1 of 8 · your messaging app</div>
+        <h2>"End-to-end" ends at the agent</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>You hand a sealed letter to a courier. The courier cannot read it. But the person it is addressed to can, and here that person is the assistant's computer, not a friend. The letter is safe on the way and open on arrival.</p>
+        </div>
+        <div class="simple">
+          <p>You type into the messaging app you already use. The message is encrypted on your phone and carried by the platform, Apple or Meta or Slack, to the number or bot you are texting.</p>
+          <p><strong>The number belongs to the agent.</strong> End-to-end encryption means only the two ends can read the message, and the agent's server is the other end. So the provider's computer reads your words in plaintext. It has to, or it could not act on them. The platform in the middle sees who messaged whom and when, and for many bot channels the content too. Encryption protects the trip, not the destination.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>iMessage</dt><dd>Encrypted device-to-device between Apple users. A business or bot is reached through Messages for Business: encrypted from your device to Apple, then delivered to the business's endpoint over TLS. Apple is a relay, the business is the end.</dd>
+            <dt>WhatsApp</dt><dd>Personal chats are end-to-end. Chats with a business on the Cloud API terminate at Meta-hosted infrastructure, or at the business's own server on the on-premises API. Meta's documentation says as much; the business, or the vendor running its integration, reads plaintext.</dd>
+            <dt>Slack, Telegram bots, SMS</dt><dd>Not end-to-end at all. The platform reads content, stores it, and hands it to the bot over HTTPS.</dd>
+            <dt>Metadata</dt><dd>Sender, recipient, timestamps, message sizes and delivery receipts are visible to the platform in every case, encrypted content or not.</dd>
+            <dt>What this means</dt><dd>Your threat model for an agent is the provider's security and policy, not the transport. The transport is fine.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-2" data-step="2">
+        <div class="eyebrow">Step 2 of 8 · the provider's inbox</div>
+        <h2>Your message lands in a database before it reaches a model</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The letter arrives at an office. A clerk checks who it is from, pulls your folder from the filing cabinet, which holds every past letter and the notes they kept about you, and clips the new letter to the front.</p>
+        </div>
+        <div class="simple">
+          <p>The platform delivers your message to the provider as a <strong>webhook</strong>, a web request to a URL they registered. An <strong>orchestrator</strong>, the program that runs the agent, looks up which account the sender belongs to and loads your conversation.</p>
+          <p>This is the first place your data is stored. The message, the earlier turns, the agent's notes about you, and the keys to your connected accounts all live in the provider's database. It is encrypted on disk with the provider's own keys, which means the provider, and anyone with the right access inside it, can read it. That is normal and unavoidable for a service that acts on your behalf. It is also the thing to ask about before connecting your email.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Webhook</dt><dd>HTTPS POST from the platform with sender id, message body, attachments and a signature the provider verifies. Retried on failure, so the inbox must be idempotent.</dd>
+            <dt>Account resolution</dt><dd>Phone number or platform user id → your account, plan and entitlements. This is also where rate limits and abuse checks run.</dd>
+            <dt>Conversation store</dt><dd>Typically a Postgres row per message plus an object store for attachments, encrypted at rest with cloud KMS keys the provider controls. Retention is a policy choice: often the life of the account, sometimes shorter for content.</dd>
+            <dt>Token vault</dt><dd>OAuth refresh tokens for your calendar and email, stored separately, encrypted with a key that only the orchestrator's service role can use. A leak here is the worst case, because tokens act as you.</dd>
+            <dt>Staff access</dt><dd>Governed by policy and audit logs, not by cryptography. Look for statements about access controls, SOC 2 reports and whether support staff can read conversation content.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-3" data-step="3">
+        <div class="eyebrow">Step 3 of 8 · context assembly</div>
+        <h2>Copies of your calendar and inbox go into the request</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>Before answering, the clerk opens your diary, skims your recent letters with Priya, and glances at the alarm board. They copy the relevant bits onto one sheet, together with your letter and the office rulebook, and hand that sheet to the expert in the back room.</p>
+        </div>
+        <div class="simple">
+          <p>The model cannot browse your accounts. The orchestrator does it for the model. Using the keys you granted when you connected each account, it fetches tomorrow's calendar, recent email threads that mention Priya, and any open Sentry alert, and pastes the results into one request alongside the agent's instructions, the list of tools it may use, its memory of you, and your message.</p>
+          <p><strong>This is the step people don't picture.</strong> Your data has now been copied out of Google's or Microsoft's systems into a text document that will travel to a model. The request is a few thousand tokens before the model has done anything. Every extra connected account makes it larger and slower, and adds to what the next two companies see.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>OAuth</dt><dd>When you connected Calendar, you approved scopes such as <code>calendar.events</code> and <code>gmail.send</code>. The provider holds a refresh token and mints short-lived access tokens per call. Revoking access at Google or Microsoft kills the token everywhere at once.</dd>
+            <dt>Retrieval</dt><dd>Cheap heuristics first: events in a time window, threads matching a name, open issues. Heavier setups embed your mail and do vector search. Either way, only what is retrieved is sent; the rest stays where it was.</dd>
+            <dt>Tool definitions</dt><dd>JSON schemas describing each action the model may request, sent with every call. Twenty tools cost one to two thousand tokens before any content. The Model Context Protocol standardises this shape.</dd>
+            <dt>Request size</dt><dd>Instructions and tools around 2,400 tokens, memories about 300, retrieved context about 1,500, your message. Roughly 4,500 tokens for the first call in this example.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-4" data-step="4">
+        <div class="eyebrow">Step 4 of 8 · the model call</div>
+        <h2>A second company sees the request</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The office does not employ the expert. It sends the sheet to an expert's office across town, waits for the reply, and files a copy of both. Two offices now have your letter.</p>
+        </div>
+        <div class="simple">
+          <p>Most agent providers do not train or host their own model. The orchestrator sends the assembled request to a model API run by another company, and the whole <a href="./">Prompt journey</a> happens there: wire, batching, prefill, decode, streaming back. Compressed on the stage to one row.</p>
+          <p>The consequence is that two companies now hold your data under two policies. The provider keeps the transcript for as long as its terms say. The model API keeps request logs for its own window, often zero to thirty days for business customers, and under API terms does not train on them. Both are worth reading; the second one is easy to forget because you never chose it.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>The call</dt><dd>One HTTPS POST to the model API from the provider's servers with the full request, <code>tools</code> array included. The response is either text or a structured tool call. Streaming is often disabled inside agent loops because the orchestrator needs the complete tool call before acting.</dd>
+            <dt>Retention at the model API</dt><dd>API traffic typically defaults to a short abuse-monitoring window and no training; zero-data-retention agreements exist for larger customers. Ask the provider which tier they are on.</dd>
+            <dt>Prompt caching</dt><dd>The instructions and tool schemas are identical on every call, so a prefix cache at the model API makes loops 2 to 4 cheaper and faster. The Prompt page's step 8 is doing real work here.</dd>
+            <dt>Region</dt><dd>The provider's servers and the model API may be in different countries. Data residency claims need to cover both.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-5" data-step="5">
+        <div class="eyebrow">Step 5 of 8 · the tool loop</div>
+        <h2>One text becomes four model calls</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The expert does not do things. They write instructions: "look up Friday", "find a free slot", "draft the email". The clerk runs each errand, comes back with the result, and the expert reads everything again before writing the next instruction. Four trips for one request.</p>
+        </div>
+        <div class="simple">
+          <p>The model's first reply is not an answer. It is a <strong>tool call</strong>: read the calendar for tomorrow. The orchestrator runs it with your token, appends the result to the request, and calls the model again. Now it asks to move the event. Again. Now it drafts the email. Again. Finally it writes the reply to you.</p>
+          <p>Each loop is a full model call on a request that has grown by the last result. That is where the time and the compute go: four calls of three to five seconds each, on 5,000 then 7,000 then 9,000 then 11,000 tokens, instead of the one call a chat answer takes. A request that "just moves a meeting" is a small program executed one step at a time.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Loop shape</dt><dd>Call model → if response contains tool calls, execute them (often in parallel), append <code>tool_result</code> blocks, call again → until the model returns plain text or a step limit is hit. Providers cap loops at 10 to 30 to bound cost.</dd>
+            <dt>Context growth</dt><dd>Every tool result stays in the transcript for subsequent calls. Verbose results (a full inbox page) balloon the context; good orchestrators truncate and summarise tool output before appending.</dd>
+            <dt>Time per loop</dt><dd>Prefill on the growing context plus decode of a few hundred tokens of tool call, plus the tool's own latency: a calendar read is fast, an email search can take seconds.</dd>
+            <dt>Failure handling</dt><dd>A tool error is appended as a result and the model is asked to recover. Retries multiply cost; runaway loops are the classic agent bill shock.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-6" data-step="6">
+        <div class="eyebrow green">Step 6 of 8 · the human in the loop</div>
+        <h2>Before it sends, it asks. The human is you.</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>Before posting the letter to Priya, the clerk knocks on your door: "Friday at ten, and I'll tell her. Yes?" Nothing moves until you nod. Managers in the office can read the file afterwards, but they do not get to nod for you.</p>
+        </div>
+        <div class="simple">
+          <p>Moving your own event is reversible. Emailing Priya is not. Well-built agents draw that line: before an irreversible or outward-facing action they stop and send you a confirmation in the chat. The loop pauses, the tokens sit idle, and nothing runs until you tap.</p>
+          <p>Two things are often confused here. <strong>The human in the loop is you</strong>, not the provider's staff. Staff can read conversation logs under the provider's access policy, but they are not reviewing or approving actions in real time. And <strong>the gate is a product decision</strong>, not a property of the model. Some products skip it for speed. Whether yours asks before sending, paying or deleting is something to test on day one.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Gated actions</dt><dd>Anything that leaves your account or cannot be undone: send email or message, make a payment, delete, share externally, post publicly. Reads and internal edits usually run without asking.</dd>
+            <dt>Mechanics</dt><dd>The tool call is parked in the database with a pending state; a message with the proposed action goes to you; your reply resolves it; the loop resumes with the tool result. Timeouts expire pending actions after hours or days.</dd>
+            <dt>Standing approvals</dt><dd>"Always allow emails to Priya" turns a gate into a rule. Convenient, and the point at which a misread instruction can act without you.</dd>
+            <dt>Staff access</dt><dd>Read access to logs for support and safety, governed by policy and audit trails. Distinct from any ability to approve or trigger actions on your accounts, which they should not have.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-7" data-step="7">
+        <div class="eyebrow">Step 7 of 8 · action and reply</div>
+        <h2>Two API calls in your name, and a longer paper trail</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The clerk moves the appointment in your diary, posts the letter to Priya, and sends you a note: "Done." Then they file everything: your letter, their errands, the reply, and a new note in your folder that says Priya prefers mornings.</p>
+        </div>
+        <div class="simple">
+          <p>With your approval, the orchestrator calls the Calendar API to move the event and the Email API to send the note, both authenticated as you. Your accounts show the change as if you had made it yourself. The confirmation travels back down the same messaging path to your phone.</p>
+          <p>Count what now exists. The transcript, the tool results (your calendar rows, your email threads), a new memory about Priya, and an audit entry, all at the provider. Request logs at the model API for its window. The moved event and the sent email in your own accounts, where they were always going to be. None of this is sinister. It is simply more copies in more places than a chat answer leaves behind, and worth knowing before you connect something sensitive.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Acting as you</dt><dd>The calls carry your OAuth access token, so the receiving service records you as the actor. Some providers add a footer or header identifying the agent; many do not.</dd>
+            <dt>Memory writes</dt><dd>The model or a side process extracts durable facts ("Priya prefers mornings", "user is in Boston") into a memory store injected into future requests. Review and delete these; they persist independently of the conversation.</dd>
+            <dt>Audit log</dt><dd>Which tool ran with which arguments, when, and on whose approval. Ask whether you can see yours. It is the record that matters if something went wrong.</dd>
+            <dt>Reply path</dt><dd>Provider → platform API → your device, encrypted per platform as in step 1, in reverse.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="step" id="step-8" data-step="8">
+        <div class="eyebrow">Step 8 of 8 · while you sleep</div>
+        <h2>The agent runs without you, on permissions you granted once</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>At three in the morning the alarm board lights up. The clerk, who never sleeps, reads it, opens your folder, works out what to do, and leaves a note on your door. You gave them the office keys once; they use them whenever the alarm goes.</p>
+        </div>
+        <div class="simple">
+          <p>An agent connected to Sentry does not wait for you to text. An alert fires a webhook into the same inbox, the same orchestrator assembles context, the same loop runs, and a message appears on your phone at 3:12 am with a summary and a suggested fix. Scheduled runs work the same way: a morning briefing is a loop that starts on a timer.</p>
+          <p>This is compute spent, and data read, while nobody is watching. It is also the point of an agent. The trade is <strong>standing permissions</strong>: tokens that keep working, memories that keep accumulating, gates that you may have loosened. Know where the list of connected accounts is, in the provider's settings and in your Google or Microsoft account's third-party access page, because revoking there is the one switch that stops everything at once.</p>
+        </div>
+        <div class="nerd">
+          <span class="tag">Internals</span>
+          <dl>
+            <dt>Triggers</dt><dd>Inbound webhooks (Sentry, GitHub, Stripe), cron schedules, and polling of accounts without webhooks. Each trigger is a job in the provider's queue that starts a loop with no user message.</dd>
+            <dt>Compute at rest</dt><dd>A daily briefing plus a handful of alerts is tens of model calls per day per user, on contexts as large as the interactive ones. This is the cost line that scales with users even when they are idle.</dd>
+            <dt>Refresh tokens</dt><dd>Long-lived by design; Google's expire after six months of inactivity, Microsoft's after ninety days, otherwise indefinitely until revoked. Rotating them is the provider's job; revoking them is yours.</dd>
+            <dt>Revocation</dt><dd>Google: myaccount.google.com → Security → Third-party apps. Microsoft: account.microsoft.com → Privacy → App access. Slack: workspace apps. These kill the token even if the provider's own settings page does not.</dd>
+          </dl>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</main>
+
+<nav class="after-nav" id="after-nav" aria-label="After the journey">
+  <div class="wrap">
+    <span class="eyebrow">After the journey</span>
+    <a href="#answers">Five answers</a>
+    <a href="#datamap">Data map</a>
+    <a href="#time">Where the time goes</a>
+    <a href="#bill">The bill</a>
+    <a href="./">The Prompt journey</a>
+  </div>
+</nav>
+
+<section class="after" id="answers">
+  <div class="wrap">
+    <div class="eyebrow">The five questions · short answers</div>
+    <h2>If you only read one section</h2>
+    <div class="answers">
+      <div><span class="k">stored where</span><p>Transcript, tool results, memories, tokens and audit log at the <b>provider</b>. Request logs at the <b>model API</b> for its window. Metadata at the <b>messaging platform</b>. The changed event and sent email in <b>your accounts</b>.</p></div>
+      <div><span class="k">encrypted</span><p>In transit everywhere. End-to-end only as far as the agent's server, which <b>reads plaintext by design</b>. At rest with the provider's keys, which means the provider can read it under its own policy.</p></div>
+      <div><span class="k">human in the loop</span><p><b>You</b>, at approval gates before irreversible actions, if the product has them. Provider staff can <b>read logs</b> under policy; they do not approve actions. Test the gate on day one.</p></div>
+      <div><span class="k">how long</span><p>Tens of seconds for a small task: delivery, context fetch, <b>four model calls on a growing context</b>, tool latency, and however long you take to approve.</p></div>
+      <div><span class="k">compute</span><p>Several model calls per message, each larger than the last, plus runs you never see: <b>alerts and schedules</b> spend compute while you sleep. Tens of cents per task, not a fraction of one.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="after" id="datamap">
+  <div class="wrap">
+    <div class="eyebrow">Data map</div>
+    <h2>Every copy of your data, by who holds it</h2>
+    <p class="lede">For the one message followed above. Read the last two columns before connecting anything you would not email to a stranger.</p>
+    <div class="compare-wrap">
+      <table class="compare datamap">
+        <thead><tr><th>Party</th><th>Holds</th><th>Encryption</th><th>Who can read it</th><th>How long</th></tr></thead>
+        <tbody>
+          <tr><td>Your device</td><td>The conversation as shown in your app.</td><td><span class="enc e2e">device</span>Device encryption, your passcode.</td><td>You.</td><td>Until you delete the chat.</td></tr>
+          <tr><td>Messaging platform<br><span style="color:var(--muted);font-family:var(--sans);text-transform:none;letter-spacing:0">Apple, Meta, Slack</span></td><td>Sender, recipient, timestamps, sizes. Content for channels that are not end-to-end.</td><td><span class="enc rest">in transit</span>Encrypted to the platform; onward to the agent over TLS.</td><td>The platform, under its policy. Law enforcement with process.</td><td>Metadata retention varies by platform; content per its policy.</td></tr>
+          <tr><td>Agent provider</td><td>Transcript, tool results (your calendar and email excerpts), memories, OAuth tokens, audit log.</td><td><span class="enc plain">plaintext to them</span>Encrypted at rest with the provider's keys.</td><td>The orchestrator. Staff with access, under policy and audit. Anyone who compromises the provider.</td><td>Life of the account or per its retention terms. Memories until you delete them. Tokens until revoked.</td></tr>
+          <tr><td>Model API</td><td>Each request and response, including the retrieved context.</td><td><span class="enc plain">plaintext to them</span>TLS in transit; logs encrypted at rest with their keys.</td><td>Their abuse and reliability systems; staff under policy.</td><td>Typically 0 to 30 days on API terms; zero-retention tiers exist. Not trained on under API terms.</td></tr>
+          <tr><td>Your accounts<br><span style="color:var(--muted);font-family:var(--sans);text-transform:none;letter-spacing:0">Google, Microsoft, Sentry</span></td><td>The moved event, the sent email, an access-log entry showing the agent's token acted as you.</td><td><span class="enc rest">unchanged</span>Whatever they already had.</td><td>As before, plus the agent for as long as its token lives.</td><td>As before. Revoke third-party access to end the agent's reach.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="after" id="time">
+  <div class="wrap">
+    <div class="eyebrow">Time</div>
+    <h2>Where the seconds go</h2>
+    <p class="lede">A one-line request, four model calls, one approval. The striped block is you: the loop waits as long as you do.</p>
+    <div class="waterfall" id="waterfall">
+      <p class="total"><span>One task · send to "done"</span><span id="w-total">–</span></p>
+      <div class="bar" role="img" aria-label="Time breakdown for one agent task">
+        <div class="seg deliver" id="w-deliver">deliver</div>
+        <div class="seg fetch" id="w-fetch">context</div>
+        <div class="seg model" id="w-m1">call 1</div>
+        <div class="seg tool" id="w-t1">read</div>
+        <div class="seg model" id="w-m2">call 2</div>
+        <div class="seg tool" id="w-t2">move</div>
+        <div class="seg model" id="w-m3">call 3</div>
+        <div class="seg you" id="w-you">you</div>
+        <div class="seg tool" id="w-t3">send</div>
+        <div class="seg model" id="w-m4">call 4</div>
+        <div class="seg reply" id="w-reply">reply</div>
+      </div>
+      <ul class="legend">
+        <li><i style="background:var(--ground)"></i>message delivery, there and back <b id="l-deliver">–</b></li>
+        <li><i style="background:#E4E9E5"></i>context fetch from three accounts <b id="l-fetch">–</b></li>
+        <li><i style="background:var(--pink)"></i>four model calls, growing context <b id="l-model">–</b></li>
+        <li><i style="background:var(--green-tint)"></i>three tool executions <b id="l-tool">–</b></li>
+        <li><i style="background:repeating-linear-gradient(135deg,var(--paper) 0 4px,var(--grid) 4px 6px)"></i>your approval <b id="l-you">shown as 8 s</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="after" id="bill">
+  <div class="wrap">
+    <div class="eyebrow">The bill</div>
+    <h2>What this one task cost to run</h2>
+    <p class="lede">Model list prices as on the Prompt page, $3 per million input tokens and $15 per million output. The provider pays this and charges you a subscription that has to cover it, including the runs you never see.</p>
+    <div class="bill">
+      <div><span class="k">model calls</span><div class="v" id="b-calls">4</div><p class="sub">Input <b id="b-in">–</b> tokens across the loop, output <b id="b-out">–</b>. Instructions and tools are re-sent each time; a prefix cache at the model API makes calls 2 to 4 cheaper than they look.</p></div>
+      <div><span class="k">model cost</span><div class="v" id="b-price">–</div><p class="sub">About <b id="b-mult">–</b> times the chat answer on the Prompt page. Cache hits on the shared prefix bring it down; verbose tool results push it up.</p></div>
+      <div><span class="k">electricity</span><div class="v" id="b-wh">–<small>Wh</small></div><p class="sub">Four calls' worth of node time plus the orchestrator's own servers. Roughly <b id="b-led">–</b> of a 10 W bulb.</p></div>
+      <div><span class="k">per month, idle</span><div class="v" id="b-month">–</div><p class="sub">If the agent also runs a daily briefing and handles a few alerts a day, that is <b>~150 tasks a month</b> whether or not you text it. This is why agent subscriptions cost what they cost.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Caveats</div>
+      <h3>What is simplified here</h3>
+      <ul>
+        <li>"The provider" is a composite of agents you message that act on your accounts. Real products differ in whether they host their own model, where the gate sits, and how long they keep data. The shape of the journey is the same.</li>
+        <li>Encryption claims per platform are drawn from the platforms' own documentation as of 2026 and can change. Verify for the app you use.</li>
+        <li>Token counts, times and prices are illustrative and rounded. Nothing here calls any API.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="eyebrow">Colour key</div>
+      <h3>How to read the stage</h3>
+      <ul>
+        <li><strong style="color:var(--green-ink)">Green</strong> is your message and data derived from it.</li>
+        <li><strong style="color:var(--pink-ink)">Pink</strong> is what the agent generates or does.</li>
+        <li>Grey is machinery and other parties' systems.</li>
+      </ul>
+      <div class="eyebrow" style="margin-top:28px">Keyboard</div>
+      <p><code>↓</code> <code>↑</code> or <code>J</code> <code>K</code> move between steps. <code>1</code> to <code>8</code> jump to a step.</p>
+    </div>
+    <div class="sources">
+      <div class="eyebrow">Sources and further reading</div>
+      <h3>Where the claims come from</h3>
+      <ol>
+        <li>Anthropic, <a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use">Tool use</a>, and OpenAI, <a href="https://platform.openai.com/docs/guides/function-calling">Function calling</a>. The loop shape in step 5: tool call, tool result, call again.</li>
+        <li><a href="https://modelcontextprotocol.io/">Model Context Protocol</a>. The standard shape for tool definitions and connected data sources in step 3.</li>
+        <li>IETF, <a href="https://datatracker.ietf.org/doc/html/rfc6749">RFC 6749, The OAuth 2.0 Authorization Framework</a>. Scopes, refresh tokens and revocation in steps 3 and 8.</li>
+        <li>Apple, <a href="https://support.apple.com/guide/security/welcome/web">Platform Security Guide</a>, iMessage and Messages for Business sections. WhatsApp, <a href="https://www.whatsapp.com/security">Security</a>, on end-to-end encryption and business messaging. Step 1.</li>
+        <li>Sentry, <a href="https://docs.sentry.io/organization/integrations/integration-platform/webhooks/">Integration platform webhooks</a>. The trigger in step 8.</li>
+        <li>Google, <a href="https://support.google.com/accounts/answer/3466521">Manage third-party apps and services with access to your account</a>. Revocation in step 8.</li>
+        <li>The <a href="./">Prompt journey</a> on this site, for everything that happens inside the model call in step 4, and its sources for pricing, energy and caching.</li>
+      </ol>
+    </div>
+    <div class="credits">
+      <p>Built by <a href="https://github.com/jpatel3">jpatel3</a> with Claude Code. Source, issues and corrections: <a href="https://github.com/jpatel3/prompt-round-trip">github.com/jpatel3/prompt-round-trip</a>. MIT licensed. Vendor-neutral; figures are 2026 estimates.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="stage.js"></script>
+<script>
+(function(){
+'use strict';
+const {el, text, label, lines, wrap, fmt, P, cube, screenPlane, wire, pathThrough, frameTitle, bubble, lock, Stream, tokenize, charsOf, chipRow, C, reduce} = PRT;
+
+/* ---------------- content ---------------- */
+let MSG = document.getElementById('prompt').value;
+let TOK = tokenize(MSG);
+const SYS_TOK = 2400, MEM_TOK = 300, CAL_TOK = 350, MAIL_TOK = 900, SENTRY_TOK = 250;
+const OUT_PER_CALL = 300;
+const TOOL_RESULTS = [1600, 1600, 1900]; // tokens appended after each tool
+const TIMES = { deliver: 0.8, inbox: 0.3, fetch: 1.8, m: [3.0, 3.6, 4.2, 4.8], t: [0.6, 0.9, 1.1], you: 8.0, reply: 0.8 };
+const LOOPS = [
+  { call: 'calendar.list(day="tomorrow")', result: '3 events · free 10:00–11:30', tool: 'Calendar' },
+  { call: 'calendar.move(event="Priya 15:00", to="Fri 10:00")', result: 'moved · id evt_8f2', tool: 'Calendar' },
+  { call: 'email.draft(to="priya@…", subject="Moved to Fri 10")', result: 'draft ready · awaiting approval', tool: 'Email' },
+  { call: 'reply("Done. Moved to Fri 10 am and emailed Priya.")', result: 'sent to you', tool: 'You' }
+];
+const REPLY = 'Done. Moved your 3 pm with Priya to Friday 10:00 and emailed her.';
+function ctxTokens(i){ let n = SYS_TOK + MEM_TOK + CAL_TOK + MAIL_TOK + SENTRY_TOK + TOK.length; for (let k = 0; k < i; k++) n += OUT_PER_CALL + (TOOL_RESULTS[k] || 0); return n; }
+
+/* ---------------- shared drawing bits ---------------- */
+function phone(parent, ox, oy, w, h){
+  cube(parent, ox, oy, 0, 0, 0, w, 10, h, {top:C.ink, left:'#1A211C', right:'#0B0F0C', stroke:C.ink});
+  const plane = screenPlane(parent, ox, oy, 4, 10, 8, w - 8, h - 16, {fill:C.paper, stroke:C.ink});
+  const top = P(ox, oy, w/2, 5, h);
+  return {plane: plane, w: w - 8, h: h - 16, top: top, right: P(ox, oy, w, 5, h*0.6)};
+}
+function chatHeader(plane, w, title){
+  el('rect', {x:0, y:0, width:w, height:16, fill:C.ground}, plane);
+  text(plane, 6, 11, title, {size:7, weight:500});
+}
+function node(parent, ox, oy, size, name, sub, o){
+  o = o || {};
+  const c = cube(parent, ox, oy, 0, 0, 0, size, size, o.h || Math.round(size*0.55), o.green ? {top:C.green} : o.pink ? {top:C.pink} : o.dark ? {top:C.ink, left:'#2A332D', right:'#1A211C'} : {});
+  const ly = oy + size + 14;
+  label(parent, ox, ly, name, {fill:C.ink, anchor:'middle'});
+  if (sub) label(parent, ox, ly + 12, sub, {size:8.5, anchor:'middle'});
+  return c;
+}
+
+/* 1 · your messaging app */
+function scene1(s){
+  s.accent = C.green;
+  frameTitle(s, '01', 'Your messaging app', 'Encrypted from your phone to the platform, then delivered to the agent\'s endpoint over TLS. The agent\'s server is the other end of "end-to-end", so it reads your words in plaintext. The platform sees who, when, and often what.',
+    'The courier cannot read your letter. The office it is addressed to can, and that office is the assistant.');
+  const ph = phone(s.g, 130, 470, 100, 190);
+  chatHeader(ph.plane, ph.w, 'Assistant');
+  const ml = wrap(MSG, 22).slice(0, 4);
+  const b = bubble(ph.plane, 14, 26, ph.w - 22, ml, {fill:C.greenTint, stroke:C.greenInk, size:7.5, lh:10});
+  text(ph.plane, ph.w - 10, b.bottom + 9, 'Delivered', {size:5.5, anchor:'end', fill:C.muted, sans:true});
+  const dots = el('g', {}, ph.plane);
+  el('rect', {x:8, y:b.bottom + 16, width:34, height:14, rx:4, fill:C.ground, stroke:C.grid, 'stroke-width':0.8}, dots);
+  const d1 = el('circle', {cx:16, cy:b.bottom + 23, r:1.6, fill:C.muted}, dots);
+  const d2 = el('circle', {cx:24, cy:b.bottom + 23, r:1.6, fill:C.muted}, dots);
+  const d3 = el('circle', {cx:32, cy:b.bottom + 23, r:1.6, fill:C.muted}, dots);
+  s.anims.push(t => { const k = Math.floor(t*3) % 3; [d1,d2,d3].forEach((d,i) => d.setAttribute('opacity', i === k ? 1 : 0.35)); });
+  label(s.g, 130, 520, 'your phone', {anchor:'middle', fill:C.ink});
+
+  const relay = node(s.g, 400, 330, 46, 'messaging platform', 'Apple · Meta · Slack');
+  const endp = node(s.g, 640, 240, 52, 'the agent\'s endpoint', 'provider servers', {pink:true});
+  const w1 = wire(s.g, pathThrough([ph.top, [ph.top[0] + 40, ph.top[1] - 20], [relay.topCenter[0] - 30, relay.topCenter[1] + 15], relay.topCenter]), {stroke:C.greenInk, sw:1.2});
+  const w2 = wire(s.g, pathThrough([relay.topCenter, [relay.topCenter[0] + 60, relay.topCenter[1] - 25], [endp.topCenter[0] - 40, endp.topCenter[1] + 18], endp.topCenter]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
+  s.streams.push(new Stream(s.g, w1, charsOf(TOK), {speed:60, n:10}));
+  s.streams.push(new Stream(s.g, w2, charsOf(TOK), {speed:60, n:9}));
+  // locks and labels along the way
+  lock(s.g, 255, 360); label(s.g, 268, 364, 'encrypted to the platform', {size:8.5, fill:C.greenInk});
+  lock(s.g, 500, 268); label(s.g, 513, 272, 'TLS · platform → business API', {size:8.5, fill:C.greenInk});
+  label(s.g, 640, 200, 'end-to-end ends here', {anchor:'middle', fill:C.pinkInk});
+  label(s.g, 640, 212, 'the agent is the other end · it reads plaintext', {anchor:'middle', size:8.5, fill:C.pinkInk});
+  // who can read
+  const cx = 36, cy = 96;
+  label(s.d, cx, cy, 'who can read this message', {fill:C.ink});
+  const rows = [['your device', 'yes', C.ink], ['the platform', 'who · when · size; content on some channels', C.ink2], ['the agent', 'yes · necessarily', C.pinkInk]];
+  rows.forEach((r, i) => {
+    label(s.d, cx, cy + 22 + i*20, r[0], {size:8.5});
+    text(s.d, cx + 100, cy + 22 + i*20, r[1], {size:10.5, weight:500, fill:r[2]});
+  });
+  label(s.d, cx, cy + 96, 'iMessage: device → Apple encrypted, Apple → business over TLS', {size:8, cls:'nerd-only'});
+  label(s.d, cx, cy + 108, 'WhatsApp Business API: terminates at Meta-hosted or business infra', {size:8, cls:'nerd-only'});
+  label(s.d, cx, cy + 120, 'Slack · Telegram bots · SMS: not end-to-end at all', {size:8, cls:'nerd-only'});
+  const pg = el('g', {class:'plain-only'}, s.g);
+  lines(pg, cx, cy + 22, ['safe on the way,', 'open on arrival'], {size:14, sans:true, lh:19, weight:500});
+}
+
+/* 2 · the provider's inbox */
+function scene2(s){
+  frameTitle(s, '02', 'The provider\'s inbox', 'The platform posts your message to the provider as a webhook. The orchestrator resolves your account and loads your conversation, memories and connected-account tokens from its store: encrypted at rest with the provider\'s keys, readable by the provider under its own policy.',
+    'The clerk checks who the letter is from, pulls your folder from the cabinet, and clips the new letter to the front.');
+  const inW = wire(s.g, pathThrough([[40, 300], [150, 300], [190, 322]]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
+  s.streams.push(new Stream(s.g, inW, charsOf(TOK), {speed:60, n:7}));
+  label(s.g, 40, 288, 'webhook · HTTPS POST from the platform', {size:8.5, fill:C.greenInk});
+  const orch = node(s.g, 230, 320, 56, 'orchestrator', 'the program that runs the agent', {pink:true, h:30});
+  // account card
+  el('rect', {x:36, y:96, width:250, height:92, fill:C.paper, stroke:C.ink}, s.d);
+  el('rect', {x:36, y:96, width:250, height:20, fill:C.ink}, s.d);
+  text(s.d, 46, 110, 'account lookup', {size:9.5, fill:C.paper, weight:500});
+  lines(s.d, 46, 134, ['from: +1 ••• 4471 → you', 'plan: personal · limits ok', 'connected: calendar · email · sentry', 'queue: 0.3 s'], {size:9.5, lh:14});
+  wire(s.g, pathThrough([[160, 190], [160, 230], [230, 230], [230, 292]]), {dash:'3 4', stroke:C.muted, arrow:'arr'});
+  // conversation store: stacked slabs
+  const ox = 470, oy = 300;
+  const slabs = [['audit log', 'what ran, when, who approved', C.paper], ['token vault', 'OAuth tokens for your accounts', C.ink], ['memories', '"prefers mornings" · 14 facts', C.paper], ['past turns', '212 messages · attachments', C.paper], ['this message', TOK.length + ' tokens · just arrived', C.greenTint]];
+  slabs.forEach((sl, i) => {
+    const z = i*22;
+    cube(s.g, ox, oy, 0, 0, z, 150, 90, 14, {top:sl[2], left: sl[2] === C.ink ? '#2A332D' : undefined, right: sl[2] === C.ink ? '#1A211C' : undefined});
+    const corner = P(ox, oy, 150, 0, z + 7);
+    el('line', {x1:corner[0] + 4, y1:corner[1], x2:corner[0] + 22, y2:corner[1], stroke:C.rule}, s.g);
+    label(s.g, corner[0] + 26, corner[1] - 2, sl[0], {fill: sl[2] === C.ink ? C.pinkInk : C.ink, size:9});
+    label(s.d, corner[0] + 26, corner[1] + 9, sl[1], {size:8});
+  });
+  label(s.g, 360, 470, 'conversation store', {fill:C.ink});
+  lock(s.g, 366, 488, {color:C.ink}); label(s.g, 380, 492, 'encrypted at rest · provider\'s keys', {size:8.5});
+  label(s.g, 360, 506, 'readable by the provider under its policy', {size:8.5, fill:C.pinkInk});
+  label(s.d, 360, 528, 'first place your data is stored', {size:8.5, cls:'nerd-only'});
+  label(s.d, 360, 540, 'postgres + object store · cloud KMS keys · SOC 2 scope', {size:8, cls:'nerd-only'});
+  const toStore = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0] + 60, orch.topCenter[1] - 30], [ox - 90, 230], [ox - 30, 230], P(ox, oy, 0, 45, 5*22 + 14)]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink'});
+  s.streams.push(new Stream(s.g, toStore, charsOf(TOK), {speed:55, n:10, fill:C.pinkInk}));
+  label(s.g, 330, 212, 'load your folder · append the message', {size:8.5, fill:C.pinkInk});
+}
+
+/* 3 · context assembly */
+function scene3(s){
+  frameTitle(s, '03', 'Context assembly', 'With your stored OAuth tokens the orchestrator fetches tomorrow\'s calendar, mail with Priya and open Sentry alerts, and pastes them into one request with instructions, tools, memories and your message. Copies of your data now sit in a document bound for a model.',
+    'The clerk copies the relevant bits of your diary, letters and alarm board onto one sheet, with your letter and the rulebook.');
+  const orch = node(s.g, 200, 300, 56, 'orchestrator', '', {pink:true, h:30});
+  const services = [
+    {ox:440, oy:110, name:'calendar', sub:'tomorrow · 3 events', tok:CAL_TOK, chars:'Fri 10:00 Priya 15:00'.split('').filter(c=>c!==' ')},
+    {ox:560, oy:150, name:'email', sub:'3 threads with Priya', tok:MAIL_TOK, chars:'Re: sync moved? thanks'.split('').filter(c=>c!==' ')},
+    {ox:680, oy:190, name:'sentry', sub:'1 open alert', tok:SENTRY_TOK, chars:'500 /api/pay 12 events'.split('').filter(c=>c!==' ')}
+  ];
+  const vault = cube(s.g, 330, 130, 0, 0, 0, 40, 40, 26, {top:C.ink, left:'#2A332D', right:'#1A211C'});
+  lock(s.g, vault.topCenter[0], vault.topCenter[1] - 14, {color:C.paper, scale:0.9});
+  label(s.g, 330, 196, 'token vault', {anchor:'middle', fill:C.ink});
+  label(s.d, 330, 208, 'uses your OAuth tokens', {anchor:'middle', size:8.5});
+  services.forEach(sv => {
+    const n = node(s.g, sv.ox, sv.oy, 40, sv.name, sv.sub);
+    // token out (dashed, from vault), data back (solid green)
+    wire(s.g, pathThrough([vault.topCenter, [vault.topCenter[0], n.topCenter[1] - 40], [n.topCenter[0], n.topCenter[1] - 40], n.topCenter]), {dash:'2 4', stroke:C.muted});
+    const back = wire(s.g, pathThrough([n.topCenter, [n.topCenter[0], n.topCenter[1] + 60 + (sv.ox - 440)*0.25], [orch.topCenter[0] + 30, n.topCenter[1] + 60 + (sv.ox - 440)*0.25], orch.topCenter]), {stroke:C.greenInk, sw:1});
+    s.streams.push(new Stream(s.g, back, sv.chars, {speed:50, n:8, size:9.5}));
+  });
+  label(s.g, 470, 90, 'your connected accounts', {fill:C.ink});
+  label(s.d, 470, 78, 'scopes: calendar.events · gmail.readonly+send · sentry read', {size:8, cls:'nerd-only'});
+  // request card
+  const cx = 36, cy = 356;
+  el('rect', {x:cx, y:cy, width:360, height:190, fill:C.paper, stroke:C.ink}, s.g);
+  el('rect', {x:cx, y:cy, width:360, height:20, fill:C.ink}, s.g);
+  text(s.g, cx + 10, cy + 14, 'the request · call 1', {size:9.5, fill:C.paper, weight:500});
+  text(s.d, cx + 350, cy + 14, fmt(ctxTokens(0)) + ' tok', {size:9.5, fill:C.green, anchor:'end'});
+  const rows = [
+    ['system + tools', 'instructions · 20 tool schemas', SYS_TOK, C.ink],
+    ['memories', '"prefers mornings" · 14 facts', MEM_TOK, C.ink],
+    ['your message', '"' + (MSG.length > 30 ? MSG.slice(0, 29) + '…' : MSG) + '"', TOK.length, C.greenInk],
+    ['calendar', 'tomorrow · 3 events', CAL_TOK, C.pinkInk],
+    ['email', '3 threads with Priya', MAIL_TOK, C.pinkInk],
+    ['sentry', '1 open alert · /api/pay', SENTRY_TOK, C.pinkInk]
+  ];
+  rows.forEach((r, i) => {
+    const y = cy + 40 + i*22;
+    label(s.g, cx + 10, y, r[0], {size:8.5, fill:r[3]});
+    text(s.d, cx + 110, y, r[1], {size:9.5});
+    text(s.d, cx + 350, y, fmt(r[2]) + ' tok', {size:9.5, anchor:'end', fill:C.muted});
+  });
+  el('rect', {x:cx + 3, y:cy + 40 + 3*22 - 12, width:4, height:62, fill:C.pink}, s.g);
+  label(s.g, cx + 10, cy + 180, 'pink: copies of your data, now inside the request', {size:8.5, fill:C.pinkInk});
+  const toCard = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0], cy - 6]]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink'});
+  s.streams.push(new Stream(s.g, toCard, charsOf(TOK), {speed:50, n:4, fill:C.pinkInk}));
+  const pg = el('g', {class:'plain-only'}, s.g);
+  lines(pg, cx + 110, cy + 44, ['the office rulebook', 'notes about you', 'your letter', 'a copy of your diary', 'copies of your letters with Priya', 'a copy of the alarm board'], {size:10, sans:true, lh:22, fill:C.ink2});
+  label(s.d, 430, 420, 'the model cannot browse. the orchestrator', {size:8.5});
+  label(s.d, 430, 432, 'browses for it and pastes the results in', {size:8.5});
+  label(s.d, 430, 454, 'retrieval: time window · name match · open issues', {size:8, cls:'nerd-only'});
+  label(s.d, 430, 466, 'heavier setups: embeddings + vector search', {size:8, cls:'nerd-only'});
+  label(s.d, 430, 488, 'every extra account: bigger, slower, seen by more', {size:8.5, fill:C.pinkInk});
+}
+
+/* 4 · the model call */
+function scene4(s){
+  frameTitle(s, '04', 'The model call', 'The assembled request leaves the provider\'s servers for a model API run by a second company, where the whole Prompt journey happens. Two companies now hold your data, under two retention policies you should both read.',
+    'The office sends the sheet to an expert across town and files a copy of the reply. Two offices now have your letter.');
+  const prov = node(s.g, 150, 300, 60, 'agent provider', 'their servers · the orchestrator', {pink:true, h:32});
+  const api = node(s.g, 650, 200, 60, 'model API', 'a second company', {green:true, h:32});
+  const out = wire(s.g, pathThrough([prov.topCenter, [prov.topCenter[0] + 50, prov.topCenter[1] - 40], [api.topCenter[0] - 90, api.topCenter[1] + 10], api.topCenter]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
+  const back = wire(s.g, pathThrough([[api.topCenter[0] - 10, api.topCenter[1] + 22], [api.topCenter[0] - 100, api.topCenter[1] + 32], [prov.topCenter[0] + 40, prov.topCenter[1] - 18], [prov.topCenter[0] + 4, prov.topCenter[1] + 6]]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink', dash:'4 3'});
+  s.streams.push(new Stream(s.g, out, charsOf(TOK).concat('Fri10:00Priya'.split('')), {speed:70, n:16}));
+  s.streams.push(new Stream(s.g, back, 'calendar.list(tomorrow)'.split(''), {speed:60, n:10, fill:C.pinkInk}));
+  label(s.g, 380, 208, 'request · ' + fmt(ctxTokens(0)) + ' tokens', {anchor:'middle', fill:C.greenInk});
+  label(s.g, 400, 300, 'response · a tool call, not an answer', {anchor:'middle', fill:C.pinkInk});
+  // compressed prompt journey
+  const names = ['device', 'wire', 'data ctr', 'GPU node', 'prefill', 'decode', 'screen', 'next turn'];
+  label(s.g, 400, 396, 'inside the model API: the whole Prompt journey, compressed', {anchor:'middle', fill:C.ink});
+  names.forEach((n, i) => {
+    const ox = 190 + i*60, oy = 440;
+    const c = cube(s.g, ox, oy, 0, 0, 0, 22, 22, 14, i === 4 || i === 5 ? {top:C.green} : {});
+    label(s.g, ox, oy + 42, n, {anchor:'middle', size:7.5});
+    if (i < 7) el('line', {x1:ox + 16, y1:c.topCenter[1] + 8, x2:ox + 44, y2:c.topCenter[1] + 8, stroke:C.grid}, s.g);
+  });
+  label(s.d, 400, 500, 'streaming usually off inside a loop: the orchestrator needs the whole tool call before acting', {anchor:'middle', size:8, cls:'nerd-only'});
+  // retention labels
+  el('rect', {x:36, y:96, width:270, height:82, fill:C.paper, stroke:C.grid}, s.d);
+  label(s.d, 46, 112, 'provider keeps', {fill:C.pinkInk});
+  lines(s.d, 46, 130, ['the transcript · your account', 'for as long as its terms say', 'readable under its policy'], {size:9.5, lh:14});
+  el('rect', {x:494, y:96, width:270, height:82, fill:C.paper, stroke:C.grid}, s.d);
+  label(s.d, 504, 112, 'model API keeps', {fill:C.greenInk});
+  lines(s.d, 504, 130, ['request logs · its own window', 'often 0–30 days on API terms', 'not trained on under API terms'], {size:9.5, lh:14});
+  label(s.d, 504, 190, 'zero-retention tiers exist · ask which one', {size:8, cls:'nerd-only'});
+  label(s.d, 46, 190, 'two regions, possibly two countries', {size:8, cls:'nerd-only'});
+  const pg = el('g', {class:'plain-only'}, s.g);
+  lines(pg, 36, 120, ['two offices now', 'have your letter'], {size:14, sans:true, lh:19, weight:500});
+}
+
+/* 5 · the tool loop */
+function scene5(s){
+  frameTitle(s, '05', 'The tool loop', 'The model asks for a tool; the orchestrator runs it with your token, appends the result, and calls the model again on a bigger request. Four calls of three to five seconds each, on 5k then 7k then 9k then 11k tokens, for one line of text.',
+    'The expert writes an errand, the clerk runs it and comes back, the expert reads everything again. Four trips.');
+  const orch = node(s.g, 170, 300, 56, 'orchestrator', 'runs the tool with your token', {pink:true, h:30});
+  const model = node(s.g, 480, 250, 56, 'model', 'decides the next step', {green:true, h:30});
+  const tools = [
+    node(s.g, 300, 470, 40, 'calendar', ''),
+    node(s.g, 420, 500, 40, 'email', ''),
+    node(s.g, 540, 470, 40, 'you', 'the reply')
+  ];
+  // loop wires
+  const up = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0] + 40, orch.topCenter[1] - 40], [model.topCenter[0] - 60, model.topCenter[1] - 12], model.topCenter]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
+  const down = wire(s.g, pathThrough([[model.topCenter[0] + 6, model.topCenter[1] + 18], [model.topCenter[0] - 40, model.topCenter[1] + 60], [orch.topCenter[0] + 60, orch.topCenter[1] + 14], [orch.topCenter[0] + 10, orch.topCenter[1] + 6]]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink', dash:'4 3'});
+  s.streams.push(new Stream(s.g, up, 'request+results'.split(''), {speed:60, n:9}));
+  s.streams.push(new Stream(s.g, down, 'toolcall'.split(''), {speed:60, n:6, fill:C.pinkInk}));
+  label(s.g, 330, 216, 'request, bigger each time', {fill:C.greenInk});
+  label(s.g, 340, 352, 'tool call', {fill:C.pinkInk});
+  const toolWires = tools.map(t => wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0], t.topCenter[1] - 40], [t.topCenter[0], t.topCenter[1] - 40], t.topCenter]), {stroke:C.grid, sw:1}));
+  // loop status panel
+  const px = 560, py = 96;
+  el('rect', {x:px, y:py, width:206, height:230, fill:C.paper, stroke:C.ink}, s.g);
+  el('rect', {x:px, y:py, width:206, height:20, fill:C.ink}, s.g);
+  const loopT = text(s.g, px + 10, py + 14, 'loop 1 / 4', {size:9.5, fill:C.paper, weight:500});
+  const elapsed = text(s.g, px + 196, py + 14, '', {size:9.5, fill:C.green, anchor:'end'});
+  label(s.g, px + 10, py + 38, 'context this call', {size:8.5});
+  const ctxG = el('g', {}, s.g);
+  label(s.g, px + 10, py + 92, 'the model asks for', {size:8.5, fill:C.pinkInk});
+  const callG = el('g', {}, s.g);
+  label(s.g, px + 10, py + 150, 'the orchestrator returns', {size:8.5});
+  const resG = el('g', {}, s.g);
+  label(s.d, px + 10, py + 214, 'capped at 10–30 loops · errors are appended and retried', {size:7.5, cls:'nerd-only'});
+  // context growth bar (bottom)
+  const bx = 36, by = 96, bw = 300;
+  label(s.g, bx, by, 'context grows every loop', {fill:C.ink});
+  const maxCtx = ctxTokens(3);
+  const bars = [];
+  for (let i = 0; i < 4; i++){
+    const y = by + 14 + i*22;
+    label(s.g, bx, y + 8, 'call ' + (i+1), {size:8});
+    el('rect', {x:bx + 42, y:y, width:bw - 42, height:12, fill:C.paper, stroke:C.grid}, s.g);
+    const r = el('rect', {x:bx + 42, y:y, width:((bw - 42) * ctxTokens(i) / maxCtx).toFixed(1), height:12, fill:C.grid}, s.g);
+    text(s.g, bx + bw + 6, y + 9.5, fmt(ctxTokens(i)) + ' tok', {size:8.5, fill:C.muted});
+    bars.push(r);
+  }
+  label(s.d, bx, by + 14 + 4*22 + 8, 'instructions + tools re-sent each call · prefix cache helps', {size:8, cls:'nerd-only'});
+  const stepDur = 1.9, period = stepDur * 4 + 1.2;
+  let lastK = -1;
+  s.anims.push(t => {
+    const k = Math.min(3, Math.floor((t % period) / stepDur));
+    const cum = TIMES.deliver + TIMES.inbox + TIMES.fetch + TIMES.m.slice(0, k + 1).reduce((a,b)=>a+b, 0) + TIMES.t.slice(0, k).reduce((a,b)=>a+b, 0);
+    elapsed.textContent = 't ≈ ' + cum.toFixed(1) + ' s';
+    if (k === lastK) return; lastK = k;
+    loopT.textContent = 'loop ' + (k+1) + ' / 4';
+    bars.forEach((b, i) => b.setAttribute('fill', i === k ? C.green : i < k ? C.greenTint : C.grid));
+    while (ctxG.firstChild) ctxG.removeChild(ctxG.firstChild);
+    text(ctxG, px + 10, py + 66, fmt(ctxTokens(k)) + ' tokens', {size:18, weight:500, sans:true});
+    while (callG.firstChild) callG.removeChild(callG.firstChild);
+    lines(callG, px + 10, py + 108, wrap(LOOPS[k].call, 30).slice(0, 3), {size:8.5, lh:12, fill:C.pinkInk});
+    while (resG.firstChild) resG.removeChild(resG.firstChild);
+    lines(resG, px + 10, py + 166, wrap(LOOPS[k].result, 30).slice(0, 3), {size:8.5, lh:12});
+    tools.forEach((tn, i) => tn.querySelectorAll('polygon')[tn.querySelectorAll('polygon').length - 1].setAttribute('fill', LOOPS[k].tool === ['Calendar','Email','You'][i] ? C.pink : C.paper));
+    toolWires.forEach((w, i) => w.setAttribute('stroke', LOOPS[k].tool === ['Calendar','Email','You'][i] ? C.pinkInk : C.grid));
+  });
+}
+
+/* 6 · the human in the loop */
+function scene6(s){
+  s.accent = C.green;
+  frameTitle(s, '06', 'The human in the loop', 'Before an irreversible action the agent parks the tool call and asks you in the chat. The loop waits, nothing runs. The human is you; staff can read logs under policy but do not approve actions. Whether the gate exists is a product decision.',
+    'Before posting the letter, the clerk knocks: "Friday at ten, and I\'ll tell her. Yes?" Nothing moves until you nod.');
+  const ph = phone(s.g, 150, 470, 110, 200);
+  chatHeader(ph.plane, ph.w, 'Assistant');
+  const b1 = bubble(ph.plane, 8, 24, ph.w - 16, wrap('Move Thu 3 pm with Priya → Fri 10:00 and email her the new time?', 26), {fill:C.pinkTint, stroke:C.pinkInk, size:7, lh:9.5});
+  el('rect', {x:8, y:b1.bottom + 6, width:(ph.w - 20)/2, height:14, rx:3, fill:C.ink}, ph.plane);
+  text(ph.plane, 8 + (ph.w - 20)/4, b1.bottom + 16, 'Approve', {size:6.5, anchor:'middle', fill:C.paper, sans:true, weight:500});
+  el('rect', {x:12 + (ph.w - 20)/2, y:b1.bottom + 6, width:(ph.w - 20)/2, height:14, rx:3, fill:C.paper, stroke:C.ink, 'stroke-width':0.8}, ph.plane);
+  text(ph.plane, 12 + (ph.w - 20)*0.75, b1.bottom + 16, 'Edit', {size:6.5, anchor:'middle', fill:C.ink, sans:true, weight:500});
+  label(s.g, 150, 520, 'your phone · 14:03', {anchor:'middle', fill:C.ink});
+  // paused loop
+  const orch = node(s.g, 470, 300, 56, 'orchestrator', 'tool call parked · state: pending', {pink:true, h:30});
+  const gate = el('g', {}, s.g);
+  el('rect', {x:440, y:150, width:60, height:28, fill:C.paper, stroke:C.ink}, gate);
+  text(gate, 470, 168, 'GATE', {size:10, anchor:'middle', weight:500});
+  const waitT = text(s.g, 470, 200, 'waiting…', {size:10, anchor:'middle', fill:C.pinkInk});
+  wire(s.g, pathThrough([orch.topCenter, [470, 180]]), {stroke:C.pinkInk, sw:1.2, dash:'4 3'});
+  const ask = wire(s.g, pathThrough([[440, 164], [330, 164], [ph.top[0] + 30, ph.top[1] - 20], ph.top]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink'});
+  s.streams.push(new Stream(s.g, ask, 'Fri10:00?'.split(''), {speed:55, n:7, fill:C.pinkInk}));
+  label(s.g, 330, 182, 'the proposed action, sent to you', {fill:C.pinkInk});
+  s.anims.push(t => waitT.textContent = 'waiting for you · ' + Math.floor(t % 60) + ' s · nothing runs');
+  // two paths
+  const px = 560, py = 400;
+  el('rect', {x:px, y:py, width:206, height:150, fill:C.paper, stroke:C.ink}, s.d);
+  el('rect', {x:px, y:py, width:206, height:20, fill:C.ink}, s.d);
+  text(s.d, px + 10, py + 14, 'gated vs. ungated', {size:9.5, fill:C.paper, weight:500});
+  el('rect', {x:px + 10, y:py + 32, width:8, height:8, fill:C.green}, s.d);
+  lines(s.d, px + 24, py + 40, ['gated: send · pay · delete · share', 'pause and ask; resume on your reply'], {size:8.5, lh:12});
+  el('rect', {x:px + 10, y:py + 72, width:8, height:8, fill:C.pink}, s.d);
+  lines(s.d, px + 24, py + 80, ['ungated: read · move your own event', 'runs without asking'], {size:8.5, lh:12});
+  lines(s.d, px + 10, py + 116, ['"always allow" turns a gate into a rule', 'test the gate on day one'], {size:8.5, lh:12, fill:C.pinkInk});
+  // staff note
+  el('rect', {x:36, y:96, width:270, height:96, fill:C.paper, stroke:C.grid}, s.d);
+  label(s.d, 46, 112, 'who is the human here', {fill:C.ink});
+  lines(s.d, 46, 130, ['you: approve or edit, in the chat', 'staff: can read logs under policy', 'staff: do not approve or trigger actions', 'the model: proposes, never executes'], {size:9.5, lh:14});
+  const pg = el('g', {class:'plain-only'}, s.g);
+  lines(pg, 36, 120, ['nothing moves', 'until you nod'], {size:14, sans:true, lh:19, weight:500});
+}
+
+/* 7 · action and reply */
+function scene7(s){
+  frameTitle(s, '07', 'Action and reply', 'With your approval the orchestrator calls the Calendar and Email APIs as you, then sends the confirmation back down the messaging path. What now exists: transcript, tool results, a new memory and an audit entry at the provider; request logs at the model API; the event and the email in your accounts.',
+    'The clerk moves the appointment, posts the letter, sends you "done", and files everything, including a new note about Priya.');
+  const orch = node(s.g, 300, 280, 56, 'orchestrator', 'acting with your token', {pink:true, h:30});
+  const cal = node(s.g, 520, 150, 44, 'calendar API', 'PATCH event · moved');
+  const mail = node(s.g, 640, 240, 44, 'email API', 'POST send · to Priya');
+  const w1 = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0] + 40, orch.topCenter[1] - 60], [cal.topCenter[0] - 50, cal.topCenter[1] + 6], cal.topCenter]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink'});
+  const w2 = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0] + 90, orch.topCenter[1] - 10], [mail.topCenter[0] - 50, mail.topCenter[1] + 14], mail.topCenter]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink'});
+  s.streams.push(new Stream(s.g, w1, 'Fri10:00evt_8f2'.split(''), {speed:55, n:8, fill:C.pinkInk}));
+  s.streams.push(new Stream(s.g, w2, 'HiPriya,movedtoFri10'.split(''), {speed:55, n:9, fill:C.pinkInk}));
+  label(s.g, 560, 110, 'as you · your OAuth token', {anchor:'middle', size:8.5, fill:C.pinkInk});
+  // phone with reply
+  const ph = phone(s.g, 120, 470, 100, 190);
+  chatHeader(ph.plane, ph.w, 'Assistant');
+  const b0 = bubble(ph.plane, 14, 24, ph.w - 22, wrap(MSG, 22).slice(0, 3), {fill:C.greenTint, stroke:C.greenInk, size:6.5, lh:9});
+  const b1 = bubble(ph.plane, 6, b0.bottom + 6, ph.w - 22, wrap(REPLY, 22), {fill:C.pinkTint, stroke:C.pinkInk, size:6.5, lh:9});
+  label(s.g, 120, 520, 'your phone · 14:04', {anchor:'middle', fill:C.ink});
+  const back = wire(s.g, pathThrough([[orch.topCenter[0] - 10, orch.topCenter[1] + 10], [200, 330], [ph.top[0] + 20, ph.top[1] - 16], ph.top]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink', dash:'4 3'});
+  s.streams.push(new Stream(s.g, back, 'Done.MovedtoFri10'.split(''), {speed:50, n:8, fill:C.pinkInk}));
+  label(s.g, 200, 318, 'reply · back through the platform', {size:8.5, fill:C.pinkInk});
+  // ledger
+  const lx = 440, ly = 336;
+  el('rect', {x:lx, y:ly, width:326, height:200, fill:C.paper, stroke:C.ink}, s.d);
+  el('rect', {x:lx, y:ly, width:326, height:20, fill:C.ink}, s.d);
+  text(s.d, lx + 10, ly + 14, 'what now exists, and where', {size:9.5, fill:C.paper, weight:500});
+  const led = [
+    ['provider', 'transcript · tool results · audit entry', C.pinkInk],
+    ['provider', 'new memory: "Priya prefers mornings"', C.pinkInk],
+    ['provider', 'your tokens, still valid', C.pinkInk],
+    ['model API', 'request logs · its window', C.greenInk],
+    ['your calendar', 'event moved · actor: you (via agent)', C.ink],
+    ['your email', 'one sent message', C.ink],
+    ['platform', 'metadata for two more messages', C.muted]
+  ];
+  led.forEach((r, i) => {
+    const y = ly + 40 + i*22;
+    el('rect', {x:lx + 10, y:y - 8, width:8, height:8, fill:r[2]}, s.d);
+    label(s.d, lx + 24, y, r[0], {size:8.5});
+    text(s.d, lx + 110, y, r[1], {size:9.5});
+  });
+  const pg = el('g', {class:'plain-only'}, s.g);
+  lines(pg, lx, ly + 20, ['filed at the office:', 'your letter, the errands, the reply,', 'and a new note about Priya'], {size:11, sans:true, lh:16, fill:C.ink2});
+}
+
+/* 8 · while you sleep */
+function scene8(s){
+  frameTitle(s, '08', 'While you sleep', 'A Sentry alert fires a webhook into the same inbox. The same loop runs, on the same standing permissions, and a message reaches your phone at 3:12 am. Compute spent and data read with nobody watching. Revoking third-party access at Google or Microsoft is the one switch that stops all of it.',
+    'At three in the morning the alarm board lights up. The clerk never sleeps, and you gave them the keys once.');
+  text(s.g, 60, 110, '3:12 am', {size:24, weight:500, sans:true});
+  label(s.g, 60, 126, 'no message from you', {size:8.5});
+  const sentry = node(s.g, 130, 300, 46, 'sentry', 'alert · 500s on /api/pay');
+  const orch = node(s.g, 330, 260, 56, 'orchestrator', 'same inbox · same loop', {pink:true, h:30});
+  const model = node(s.g, 540, 180, 44, 'model API', '2 calls · ' + fmt(ctxTokens(0)) + ' + ' + fmt(ctxTokens(1)) + ' tok', {green:true});
+  const w1 = wire(s.g, pathThrough([sentry.topCenter, [sentry.topCenter[0] + 40, sentry.topCenter[1] - 40], [orch.topCenter[0] - 40, orch.topCenter[1] + 10], orch.topCenter]), {stroke:C.ink, sw:1.2, arrow:'arr'});
+  s.streams.push(new Stream(s.g, w1, 'ALERT 500 /api/pay 12'.split('').filter(c=>c!==' '), {speed:60, n:8, fill:C.ink}));
+  label(s.g, 130, 250, 'webhook · no human sent this', {anchor:'middle', size:8.5});
+  const w2 = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0] + 40, orch.topCenter[1] - 50], [model.topCenter[0] - 50, model.topCenter[1] + 10], model.topCenter]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
+  s.streams.push(new Stream(s.g, w2, 'logs+context'.split(''), {speed:60, n:7}));
+  const w3 = wire(s.g, pathThrough([[model.topCenter[0] + 4, model.topCenter[1] + 18], [model.topCenter[0] - 30, model.topCenter[1] + 50], [orch.topCenter[0] + 50, orch.topCenter[1] + 6], [orch.topCenter[0] + 10, orch.topCenter[1] + 4]]), {stroke:C.pinkInk, sw:1.1, dash:'4 3', arrow:'arr-pink'});
+  s.streams.push(new Stream(s.g, w3, 'summary+fix'.split(''), {speed:60, n:6, fill:C.pinkInk}));
+  // phone, dark, notification
+  const ph = phone(s.g, 660, 500, 100, 190);
+  el('rect', {x:0, y:0, width:ph.w, height:ph.h, fill:'#1A211C'}, ph.plane);
+  text(ph.plane, ph.w/2, 30, '3:12', {size:16, anchor:'middle', fill:C.paper, sans:true, weight:500});
+  bubble(ph.plane, 6, 44, ph.w - 12, ['Assistant', '/api/pay is failing (12 events).', 'Likely the 02:50 deploy.', 'Roll back? Reply Y.'], {fill:C.paper, stroke:C.grid, size:6.5, lh:9});
+  label(s.g, 660, 540, 'your phone · asleep', {anchor:'middle', fill:C.ink});
+  const push = wire(s.g, pathThrough([[orch.topCenter[0] + 20, orch.topCenter[1] + 26], [orch.topCenter[0] + 20, 400], [ph.top[0] - 60, 400], [ph.top[0] - 20, ph.top[1] - 10], ph.top]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink'});
+  s.streams.push(new Stream(s.g, push, 'Rollback?'.split(''), {speed:55, n:8, fill:C.pinkInk}));
+  label(s.g, 430, 392, 'pushed to you · gated: waits for Y', {size:8.5, fill:C.pinkInk});
+  // standing permissions
+  const px = 36, py = 378;
+  el('rect', {x:px, y:py, width:330, height:170, fill:C.paper, stroke:C.ink}, s.d);
+  el('rect', {x:px, y:py, width:330, height:20, fill:C.ink}, s.d);
+  text(s.d, px + 10, py + 14, 'standing permissions · granted once, used any time', {size:9.5, fill:C.paper, weight:500});
+  const perms = [['calendar', 'read · write', 'until revoked'], ['email', 'read · send', 'until revoked'], ['sentry', 'read · webhooks', 'until revoked'], ['runs', 'on alerts · daily 08:00', 'until you change it'], ['memories', '14 facts and counting', 'until you delete them']];
+  perms.forEach((p, i) => {
+    const y = py + 40 + i*22;
+    label(s.d, px + 10, y, p[0], {size:8.5});
+    text(s.d, px + 90, y, p[1], {size:9.5});
+    text(s.d, px + 320, y, p[2], {size:8.5, anchor:'end', fill:C.pinkInk});
+  });
+  label(s.d, px + 10, py + 160, 'revoke at google / microsoft third-party access: kills the token everywhere', {size:7.5, fill:C.greenInk});
+  label(s.d, 60, 150, 'compute while idle: a briefing + a few alerts a day', {size:8, cls:'nerd-only'});
+  label(s.d, 60, 162, '≈ 150 tasks a month you never typed', {size:8, cls:'nerd-only'});
+  const pg = el('g', {class:'plain-only'}, s.g);
+  lines(pg, px, py + 20, ['you gave them the keys once.', 'they use them whenever the alarm goes.'], {size:12, sans:true, lh:17, weight:500});
+}
+
+const BUILDERS = [scene1, scene2, scene3, scene4, scene5, scene6, scene7, scene8];
+
+/* ---------------- time and bill ---------------- */
+const $ = id => document.getElementById(id);
+function setText(id, v){ const e = $(id); if (e) e.textContent = v; }
+function updateAfter(){
+  // time
+  const L = { deliver: TIMES.deliver + TIMES.inbox, fetch: TIMES.fetch, m1: TIMES.m[0], t1: TIMES.t[0], m2: TIMES.m[1], t2: TIMES.t[1], m3: TIMES.m[2], you: TIMES.you, t3: TIMES.t[2], m4: TIMES.m[3], reply: TIMES.reply };
+  const total = Object.values(L).reduce((a, b) => a + b, 0);
+  Object.keys(L).forEach(k => { const seg = $('w-' + k); if (seg){ const pct = L[k] / total * 100; seg.style.width = pct.toFixed(2) + '%'; seg.classList.toggle('tiny', pct < 6); } });
+  setText('w-total', '≈ ' + total.toFixed(0) + ' s, of which ' + TIMES.you.toFixed(0) + ' s is you');
+  setText('l-deliver', (TIMES.deliver*2 + TIMES.inbox).toFixed(1) + ' s');
+  setText('l-fetch', TIMES.fetch.toFixed(1) + ' s');
+  setText('l-model', TIMES.m.reduce((a,b)=>a+b,0).toFixed(1) + ' s');
+  setText('l-tool', TIMES.t.reduce((a,b)=>a+b,0).toFixed(1) + ' s');
+  // bill
+  const inTok = [0,1,2,3].map(ctxTokens).reduce((a,b)=>a+b,0), outTok = OUT_PER_CALL * 4;
+  const price = inTok/1e6*3 + outTok/1e6*15;
+  const chat = (1218/1e6*3 + 44/1e6*15);
+  const cents = x => x*100 < 1 ? (x*100).toFixed(2) + '¢' : (x*100).toFixed(1) + '¢';
+  setText('b-in', fmt(inTok)); setText('b-out', fmt(outTok));
+  setText('b-price', cents(price));
+  setText('b-mult', Math.round(price / chat) + '×');
+  const nodeSec = inTok / 50000 + (outTok / 70) / 48 + 0.4; // + orchestrator overhead
+  const wh = 12 * 1000 * nodeSec / 3600;
+  const whEl = $('b-wh'); if (whEl){ whEl.innerHTML = ''; whEl.append(wh.toFixed(2)); const sm = document.createElement('small'); sm.textContent = 'Wh'; whEl.append(sm); }
+  const ledSec = wh / 10 * 3600;
+  setText('b-led', ledSec < 90 ? Math.round(ledSec) + ' seconds' : (ledSec / 60).toFixed(0) + ' minutes');
+  setText('b-month', '$' + (price * 150).toFixed(2));
+}
+
+PRT.init({ builders: BUILDERS, onRebuild: updateAfter, stepCount: 8 });
+
+/* message editing */
+const input = document.getElementById('prompt');
+const count = document.getElementById('tokcount');
+let deb = null;
+function onMsg(){
+  const v = input.value.trim();
+  if (!v) return;
+  MSG = v; TOK = tokenize(MSG);
+  count.textContent = TOK.length + ' tokens';
+  PRT.rebuild();
+}
+input.addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(onMsg, 250); });
+count.textContent = TOK.length + ' tokens';
+})();
+</script>
+</body>
+</html>

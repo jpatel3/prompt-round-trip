@@ -1,6 +1,10 @@
 # Prompt Round Trip
 
-An interactive, scroll-driven explainer of what happens when you send a question to Claude or ChatGPT: from your keyboard, over the wire, into a data center, across eight GPUs, through prefill and decode, back to your screen, and then how the next question knows about the last one.
+Two interactive, scroll-driven explainers sharing one visual language.
+
+**Prompt** (`index.html`): what happens when you send a question to Claude or ChatGPT: from your keyboard, over the wire, into a data center, across eight GPUs, through prefill and decode, back to your screen, and then how the next question knows about the last one.
+
+**Agent** (`agent.html`): what happens when you text an AI agent that acts on your accounts: where end-to-end encryption actually ends, what the provider stores, how your calendar and email get copied into the request, the tool loop, the approval gate, what runs while you sleep, and a data map of every copy of your data by who holds it.
 
 Eight steps, each with an animated isometric scene on a sticky stage and a card that explains what the thing is and how it works. A **Plain / Simple / Nerd** toggle sets the depth: Plain is jargon-free with an everyday analogy per step and a quieter stage; Nerd adds the internals (formulas, sizes, protocol details). A diagram text-size control (A / A+ / A++) enlarges the stage labels. The prompt is editable and its tokens ride the wires.
 
@@ -22,7 +26,7 @@ After the eight steps: where your profile and preferences enter the request (ste
 
 ## Running it
 
-It is a single self-contained `index.html` with no build step. Open the file, or serve it:
+Three files, no build step: `index.html`, `agent.html`, and the shared `stage.js` (SVG engine) and `style.css`. Open either page, or serve the folder:
 
 ```bash
 python3 -m http.server 8000
