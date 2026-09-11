@@ -1696,7 +1696,7 @@ function scene8(s){
   const w = wire(s.g, pathThrough([start, [start[0] + 26, start[1]], [start[0] + 26, bary + 15], [rx - 4, bary + 15]]), {arrow:'arr'});
   s.streams.push(new Stream(s.g, w, charsOf(TOK).concat(charsOf(FUP)), {speed:60, n:12}));
   const tl = label(s.g, 0, 0, 'whole transcript re-sent · ' + fmt(total) + ' tok', {size:8.5, anchor:'middle'});
-  tl.setAttribute('transform', 'translate(' + (start[0] + 54) + ' ' + ((start[1] + bary + 15)/2) + ') rotate(-90)');
+  tl.setAttribute('transform', 'translate(' + (start[0] + 12) + ' ' + ((start[1] + bary + 15)/2) + ') rotate(-90)');
   // kv bar
   const bw = 330;
   const frac = (total - f) / total;

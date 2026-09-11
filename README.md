@@ -6,6 +6,20 @@ Eight steps, each with an animated isometric scene on a sticky stage and a card 
 
 After the eight steps: where your profile and preferences enter the request (step 1) and why they shape the answer (step 5); the three caches and which step each changes (step 8); a comparison of who runs which step for a closed API, hosted open weights, and a laptop; a "language of the machine is numbers" strip showing text, code and an image each becoming numbers before the same arithmetic runs, and how the output loop differs by medium; and a privacy section mapping where along the journey a personal question can actually be seen (not the shared GPU batch, but logs, training, review, memory), with a checklist for sensitive documents and the offline path logged conversations take if training is on; a live bill for the current prompt (price, raw compute share, electricity, water, and a latency waterfall); a six-rung scale ladder from one request to the grid, linking to Data Center Builder; and a who-makes-what table per layer. A jump-link row after step 8 navigates these sections.
 
+## Screenshots
+
+**Step 6, decode**, Nerd depth. The KV cache grows one pink column per generated token, the sampling panel shows the top of the vocabulary, and each token rides the wire back to the device as it is produced:
+
+![Step 6: decode](docs/screenshots/step-6-decode.png)
+
+**Step 8, the next turn.** The app re-sends the whole transcript; the server matches the unchanged prefix against its cache (green) and prefills only the new question (pink):
+
+![Step 8: your next question](docs/screenshots/step-8-next-turn.png)
+
+**The opening**, with the editable prompt and the depth and text-size controls:
+
+![Hero](docs/screenshots/hero.png)
+
 ## Running it
 
 It is a single self-contained `index.html` with no build step. Open the file, or serve it:
