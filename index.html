@@ -143,6 +143,7 @@ body[data-depth="plain"] .simple{display:none}
 .caches{margin-top:22px;border-top:1px dashed var(--rule);padding-top:18px;max-width:var(--measure)}
 body[data-depth="plain"] .caches{display:none}
 .caches .tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green-ink);background:var(--green-tint);padding:3px 8px;margin-bottom:12px}
+.caches a{color:var(--ink);text-decoration-color:var(--green)}
 .caches ol{margin:0;padding:0;list-style:none;display:grid;gap:10px}
 .caches li{display:grid;grid-template-columns:118px minmax(0,1fr);gap:14px;font-size:14.5px;color:var(--ink-2)}
 .caches li b{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);padding-top:2px}
@@ -165,6 +166,40 @@ section.after .you{display:inline-block;background:var(--green-tint);color:var(-
 section.after .them{display:inline-block;background:var(--ground);color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;margin-right:6px;border:1px solid var(--grid);vertical-align:1px}
 section.after .none{display:inline-block;background:var(--pink-tint);color:var(--pink-ink);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;margin-right:6px;vertical-align:1px}
 .compare-key{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 0;font-size:13px;color:var(--muted)}
+section.after h3.sub{font-weight:500;font-size:18px;letter-spacing:-.01em;margin:36px 0 12px}
+.numbers{border:1px solid var(--ink);background:var(--paper);padding:0 0 4px;overflow-x:auto}
+.numbers-head, .numbers-row{display:grid;grid-template-columns:minmax(150px,1.1fr) 28px minmax(150px,1.3fr) 28px minmax(120px,.9fr) 28px minmax(130px,1.1fr) 28px minmax(150px,1.1fr);align-items:center;min-width:860px}
+.numbers-head{background:var(--ground);border-bottom:1px solid var(--ink);padding:8px 14px}
+.numbers-head span{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.numbers-head span:nth-child(2){grid-column:3}.numbers-head span:nth-child(3){grid-column:5}.numbers-head span:nth-child(4){grid-column:7}.numbers-head span:nth-child(5){grid-column:9}
+.numbers-row{padding:14px;border-bottom:1px solid var(--grid)}
+.numbers-row:last-of-type{border-bottom:0}
+.numbers-row .arrow{height:1px;background:var(--ink);position:relative;margin:0 4px}
+.numbers-row .arrow::after{content:"";position:absolute;right:-1px;top:-3px;border:3.5px solid transparent;border-left:6px solid var(--ink)}
+.numbers-row .io{font-size:14px;color:var(--ink);line-height:1.35}
+.numbers-row .io .kind{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.numbers-row .io code{font-size:12px}
+.numbers-row .num{font-family:var(--mono);font-size:12px;color:var(--green-ink);line-height:1.4;word-break:break-word}
+.numbers-row .num em{font-style:normal;color:var(--muted)}
+.numbers-row .num small, .numbers-row .model small{display:block;font-family:var(--sans);font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.35}
+.numbers-row .model{font-family:var(--mono);font-size:15px;letter-spacing:.1em;color:var(--ink);background:var(--ground);border:1px solid var(--grid);padding:8px 10px;text-align:center}
+.numbers-row .swatch{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:6px;background:linear-gradient(135deg,#d4c1a6,#f7f7f5 60%,#c98a4b)}
+.numbers-note{margin:14px 14px 10px;font-size:14px;color:var(--ink-2);max-width:var(--measure)}
+.privacy-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:40px}
+.privacy-grid h3{font-weight:500;font-size:18px;letter-spacing:-.01em;margin:0 0 14px}
+.privacy-grid ol{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.privacy-grid li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;font-size:14.5px;color:var(--ink-2);padding-bottom:12px;border-bottom:1px solid var(--grid)}
+.privacy-grid li:last-child{border-bottom:0}
+.privacy-grid li b{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);padding-top:2px;line-height:1.5}
+.privacy-grid .checklist li{grid-template-columns:130px minmax(0,1fr)}
+.risk-low, .risk-real{display:block;width:max-content;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;padding:1px 6px;margin-bottom:4px}
+.risk-low{background:var(--green-tint);color:var(--green-ink)}
+.risk-real{background:var(--pink-tint);color:var(--pink-ink)}
+.privacy-grid .fine{font-size:13px;color:var(--muted);margin:18px 0 0}
+@media (max-width: 900px){
+  .privacy-grid{grid-template-columns:1fr}
+  .privacy-grid li, .privacy-grid .checklist li{grid-template-columns:1fr;gap:4px}
+}
 .outputs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--ink);background:var(--paper)}
 .outputs-grid > div{padding:20px 22px 24px}
 .outputs-grid > div + div{border-left:1px solid var(--grid)}
@@ -348,7 +383,7 @@ footer li{margin-bottom:6px}
         <h2>You share the machine with strangers</h2>
         <div class="plain">
           <span class="as">Think of it as</span>
-          <p>Inside is a huge kitchen with many identical stoves. A host seats you at one that has space. Your order is cooked together with dozens of other people's orders on the same stove. That is why it is cheap.</p>
+          <p>Inside is a huge kitchen with many identical stoves. A host seats you at one that has space. Your order is cooked together with dozens of other people's orders on the same stove. That is why it is cheap. The pans never touch: nobody else's order ends up on your plate, and yours never lands on theirs.</p>
         </div>
         <div class="simple">
           <p>The building holds rows of racks, each full of GPUs, with copies of the model, called <strong>replicas</strong>, loaded on many of them. A <strong>scheduler</strong> picks a replica with room for you.</p>
@@ -363,6 +398,14 @@ footer li{margin-bottom:6px}
             <dt>Physical scale</dt><dd>A rack of eight-GPU nodes draws about 120 kW and is liquid cooled. A site is 100 MW to over 1 GW. Your request touches one rack for about a second.</dd>
             <dt>Queue time</dt><dd>Single-digit milliseconds when the region is quiet. It is the first thing to grow when a region is hot.</dd>
           </dl>
+        </div>
+        <div class="caches privacy-strip">
+          <span class="tag">Does sharing the batch expose my question?</span>
+          <ol>
+            <li><b>No, by design</b><span>Requests in a batch share the GPU's arithmetic, not each other's data. Each request has its own KV cache blocks, and attention is masked so a token can only see tokens from its own request. Your answer depends on your tokens and the weights, nothing else.</span></li>
+            <li><b>Nothing is learned</b><span>Weights are frozen during inference. What you type here cannot surface in someone else's answer tomorrow.</span></li>
+            <li><b>The real exposure</b><span>Is not on the GPU. It is in what the provider stores afterwards and what it may train on. <a href="#privacy">See where your data actually is.</a></span></li>
+          </ol>
         </div>
       </article>
 
@@ -530,9 +573,49 @@ footer li{margin-bottom:6px}
 
 <section class="after outputs">
   <div class="wrap">
-    <div class="eyebrow pink">Other outputs · code and images</div>
-    <h2>Code is text. Images are a different loop.</h2>
-    <p class="lede">This page followed a text answer. Ask for code and nothing changes. Ask for a picture and steps 5 and 6 are replaced.</p>
+    <div class="eyebrow pink">Other outputs · text, code and images</div>
+    <h2>The language of the machine is numbers.</h2>
+    <p class="lede">Whatever you ask for, the model in the middle does one thing: multiply and add very large tables of numbers. Everything you give it is turned into numbers first, and everything it returns is numbers turned back into something you can read or see. What changes by medium is the translator at each end, and how the output loop runs.</p>
+    <div class="numbers">
+      <div class="numbers-head" aria-hidden="true">
+        <span>what you give</span><span>becomes numbers</span><span>the model</span><span>numbers come out</span><span>what you get</span>
+      </div>
+      <div class="numbers-row">
+        <div class="io"><span class="kind">text</span>What is the implication of AI…</div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="num">79751 36683 16226 42056 75871 11706 …<small>one id per token</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="model">× + × + × +<small>the same weights, the same arithmetic</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="num">4021 883 17520 …<small>one id per token, one at a time</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="io"><span class="kind">text</span>AI is changing what software jobs are…</div>
+      </div>
+      <div class="numbers-row">
+        <div class="io"><span class="kind">code</span>write a function that sums a list</div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="num">7284 264 2790 430 22186 264 1168 …<small>same tokenizer, same ids</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="model">× + × + × +</div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="num">1834 2860 7 …<small>one at a time</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="io"><span class="kind">code</span><code>def total(xs): return sum(xs)</code></div>
+      </div>
+      <div class="numbers-row">
+        <div class="io"><span class="kind">image</span>a fox in the snow, watercolour</div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="num">79751 265 33110 … <em>plus</em> a grid of noise<small>prompt ids, then a canvas of random numbers</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="model">× + × + × +<small>same arithmetic, run as a few dozen passes</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="num">212 198 177 · 209 194 171 · …<small>red, green, blue per pixel, all at once</small></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="io"><span class="kind">image</span><span class="swatch" aria-hidden="true"></span>a picture</div>
+      </div>
+      <p class="numbers-note">Sound, video and spreadsheets go the same way: samples, frames and cells become numbers, the model runs, and a decoder turns numbers back into the medium. The model never sees a word, a bracket or a colour. It sees positions in very long lists.</p>
+    </div>
+    <h3 class="sub">What differs by medium</h3>
     <div class="outputs-grid">
       <div>
         <h3>Code generation</h3>
@@ -545,6 +628,40 @@ footer li{margin-bottom:6px}
       <div>
         <h3>Image generation, image tokens</h3>
         <p>Newer multimodal models treat an image as a long sequence of visual tokens and generate it with the same autoregressive decode loop as text, patch by patch, then a decoder renders the patches. This is closer to the page you scrolled, only with thousands of tokens per image and a different vocabulary. Either way, the image itself is not kept in the text KV cache across turns; the app re-attaches it, or its token form, as part of the transcript.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="after privacy" id="privacy">
+  <div class="wrap">
+    <div class="eyebrow pink">Privacy · where your data actually is</div>
+    <h2>The stranger in the batch is not the risk. Storage is.</h2>
+    <p class="lede">Step 3 puts your request on a GPU with dozens of other people's. That part is isolated by design. The places where a personal question or a tax return can actually be seen are before and after the GPU, and they depend on the product tier and settings you use.</p>
+    <div class="privacy-grid">
+      <div>
+        <h3>Along the journey</h3>
+        <ol class="risk">
+          <li><b><span class="risk-low">low</span>Step 2 · the wire</b><span>Encrypted in transit, decrypted at the provider's edge. Inside their network it is plaintext. Your trust in the provider begins here.</span></li>
+          <li><b><span class="risk-low">low</span>Steps 3 to 6 · the GPUs</b><span>Your tokens live in GPU memory for the length of the request, in cache blocks only your request can address, then the blocks are freed. Weights do not change, so nothing you send can appear in anyone else's answer.</span></li>
+          <li><b><span class="risk-low">low</span>Step 8 · the prefix cache</b><span>Scoped to your account or organization. Another customer's identical prompt does not hit your entries. Researchers have shown timing side channels on shared caches; scoping is the defence.</span></li>
+          <li><b><span class="risk-real">real</span>Logs and retention</b><span>Requests and responses are usually stored for a period for abuse monitoring and debugging. Consumer chat history stays until you delete it. API, business and enterprise tiers typically offer short or zero retention. A court order can override deletion, as one did in 2025.</span></li>
+          <li><b><span class="risk-real">real</span>Training</b><span>Consumer tiers may use conversations to improve future models unless you opt out. API and enterprise tiers generally exclude training by contract. Check the setting; do not assume.</span></li>
+          <li><b><span class="risk-real">real</span>Human review</b><span>Under abuse and safety policies, staff can read conversations that are flagged.</span></li>
+          <li><b><span class="risk-real">real</span>Memory features</b><span>If the app saves "files jointly, two dependents" as a memory, that fact rides in step 1 of every future request until you delete it.</span></li>
+          <li><b><span class="risk-real">real</span>App bugs</b><span>The one well-known cross-user leak, other people's chat titles appearing in a sidebar in 2023, was a web-app caching bug, not the GPU pipeline.</span></li>
+        </ol>
+      </div>
+      <div>
+        <h3>If you are sharing a tax return</h3>
+        <ol class="checklist">
+          <li><b>Check data controls</b><span>Turn off "improve the model" or use a plan that excludes training by default.</span></li>
+          <li><b>Prefer short retention</b><span>Business, enterprise or API tiers with zero-retention options. Temporary or incognito chat modes skip history and memory.</span></li>
+          <li><b>Redact what adds nothing</b><span>Social security numbers, account numbers, dependents' full names. The analysis does not need them.</span></li>
+          <li><b>Manage memory</b><span>Turn it off for that conversation, or delete the memories it creates afterwards.</span></li>
+          <li><b>Or keep it on your machine</b><span>Run an open-weight model locally. Nothing leaves the device. The trade is a smaller model.</span></li>
+        </ol>
+        <p class="fine">Policies and retention windows differ by product and change over time. Verify the current terms of the product you use rather than relying on this page.</p>
       </div>
     </div>
   </div>
