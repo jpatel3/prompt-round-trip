@@ -84,6 +84,8 @@ header.hero .wrap{
 .depth button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .depth button:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
 .depth .note{font-size:13px;color:var(--muted)}
+.depth .textsize button{font-family:var(--sans);font-size:14px;text-transform:none;letter-spacing:0;padding:7px 14px;min-width:44px}
+.depth .textsize button sup{font-size:9px;vertical-align:top;position:relative;top:-1px}
 
 /* ---------- journey ---------- */
 main.journey .wrap{
@@ -100,6 +102,10 @@ main.journey .wrap{
 .scene.active{opacity:1;pointer-events:auto}
 .scene .nerd-only{opacity:0;transition:opacity .3s}
 body[data-depth="nerd"] .scene .nerd-only{opacity:1}
+.scene .plain-hide{transition:opacity .3s}
+body[data-depth="plain"] .scene .plain-hide{opacity:0}
+.scene .plain-only{opacity:0;transition:opacity .3s}
+body[data-depth="plain"] .scene .plain-only{opacity:1}
 .stream text{paint-order:stroke;stroke:var(--ground);stroke-width:3px;stroke-linejoin:round}
 
 .depth-nav{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
@@ -129,6 +135,45 @@ body[data-depth="nerd"] .scene .nerd-only{opacity:1}
 .step .simple > p:first-child{color:var(--ink);font-size:17.5px}
 .nerd{display:none;margin-top:22px;border-top:1px dashed var(--rule);padding-top:18px}
 body[data-depth="nerd"] .nerd{display:block}
+.plain{display:none}
+body[data-depth="plain"] .plain{display:block}
+body[data-depth="plain"] .simple{display:none}
+.plain p{color:var(--ink);font-size:18.5px;line-height:1.5}
+.plain .as{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.caches{margin-top:22px;border-top:1px dashed var(--rule);padding-top:18px;max-width:var(--measure)}
+body[data-depth="plain"] .caches{display:none}
+.caches .tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green-ink);background:var(--green-tint);padding:3px 8px;margin-bottom:12px}
+.caches ol{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.caches li{display:grid;grid-template-columns:118px minmax(0,1fr);gap:14px;font-size:14.5px;color:var(--ink-2)}
+.caches li b{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);padding-top:2px}
+.caches li span em{font-style:normal;color:var(--ink);font-weight:600}
+
+/* ---------- after the journey ---------- */
+section.after{border-top:1px solid var(--grid)}
+section.after .wrap{padding-top:56px;padding-bottom:24px}
+section.after h2{font-weight:500;letter-spacing:-.02em;font-size:clamp(26px,2.6vw,36px);line-height:1.12;margin:14px 0 12px;text-wrap:balance;max-width:26ch}
+section.after .lede{max-width:var(--measure);color:var(--ink-2);margin:0 0 28px}
+.compare-wrap{overflow-x:auto;border:1px solid var(--ink);background:var(--paper)}
+table.compare{border-collapse:collapse;width:100%;min-width:820px;font-size:14px}
+table.compare th, table.compare td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid var(--grid)}
+table.compare th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;color:var(--ink);background:var(--ground);border-bottom:1px solid var(--ink)}
+table.compare th + th, table.compare td + td{border-left:1px solid var(--grid)}
+table.compare tbody tr:last-child td{border-bottom:0}
+table.compare td:first-child{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);white-space:nowrap}
+table.compare td{color:var(--ink-2)}
+section.after .you{display:inline-block;background:var(--green-tint);color:var(--green-ink);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;margin-right:6px;vertical-align:1px}
+section.after .them{display:inline-block;background:var(--ground);color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;margin-right:6px;border:1px solid var(--grid);vertical-align:1px}
+section.after .none{display:inline-block;background:var(--pink-tint);color:var(--pink-ink);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.compare-key{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 0;font-size:13px;color:var(--muted)}
+.outputs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--ink);background:var(--paper)}
+.outputs-grid > div{padding:20px 22px 24px}
+.outputs-grid > div + div{border-left:1px solid var(--grid)}
+.outputs-grid h3{font-weight:500;font-size:17px;letter-spacing:-.01em;margin:0 0 10px}
+.outputs-grid p{font-size:14.5px;color:var(--ink-2);margin:0}
+@media (max-width: 900px){
+  .outputs-grid{grid-template-columns:1fr}
+  .outputs-grid > div + div{border-left:0;border-top:1px solid var(--grid)}
+}
 .nerd .tag{
   display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--pink-ink);background:var(--pink-tint);padding:3px 8px;margin-bottom:12px;
@@ -196,10 +241,19 @@ footer li{margin-bottom:6px}
       </div>
       <div class="depth" role="group" aria-label="Explanation depth">
         <span class="seg">
+          <button type="button" data-depth="plain" aria-pressed="false">Plain</button>
           <button type="button" data-depth="simple" aria-pressed="true">Simple</button>
           <button type="button" data-depth="nerd" aria-pressed="false">Nerd</button>
         </span>
-        <span class="note">Nerd adds the internals: formulas, sizes, protocol details.</span>
+        <span class="note">Plain has no jargon. Nerd adds formulas, sizes and protocol details.</span>
+      </div>
+      <div class="depth" role="group" aria-label="Diagram text size">
+        <span class="seg textsize">
+          <button type="button" data-fs="1" aria-pressed="true" aria-label="Diagram text: normal">A</button>
+          <button type="button" data-fs="1.25" aria-pressed="false" aria-label="Diagram text: larger">A<sup>+</sup></button>
+          <button type="button" data-fs="1.5" aria-pressed="false" aria-label="Diagram text: largest">A<sup>++</sup></button>
+        </span>
+        <span class="note">Diagram text size. Labels may crowd at the largest setting.</span>
       </div>
     </div>
   </div>
@@ -245,13 +299,19 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-1" data-step="1">
         <div class="eyebrow">Step 1 of 8 · your device</div>
         <h2>Words become numbers before they leave your hand</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>Your sentence is cut into small pieces, like words on fridge magnets, and every piece has a number. The app puts your pieces in an envelope together with its own instructions and a note about you, the things you told it in settings, then seals it and sends it off.</p>
+        </div>
         <div class="simple">
           <p>You typed a sentence. The app does not send sentences. It chops your text into <strong>tokens</strong>: chunks of roughly three or four characters that the model has a numbered vocabulary for. Your question becomes about a dozen of them.</p>
           <p>The app also bundles in things you never see. A <strong>system prompt</strong> describing how the assistant should behave, and every earlier message in this chat. All of it is packed into one request, encrypted, and sent.</p>
+          <p><strong>This is where you enter the picture.</strong> Anything you told the app about yourself in settings, that you are a software developer or a teacher, where you live, how you like answers phrased, plus any facts it saved from earlier chats, is written into the system prompt right here, as ordinary tokens at the front of the request. The model never looks you up. It only ever sees what the app pasted in.</p>
         </div>
         <div class="nerd">
           <span class="tag">Internals</span>
           <dl>
+            <dt>Your profile</dt><dd>Custom instructions, preferences and "memory" facts are assembled by the app into the system prompt, often as a labelled block after the provider's own instructions, together with today's date and your locale. Some apps first run a retrieval step to pick which saved facts are relevant to this question. Either way the result is text, sent every turn, sitting in the cached prefix (step 8) until you edit your settings.</dd>
             <dt>Tokenizer</dt><dd>Byte-pair encoding over a vocabulary of roughly 100k to 200k entries. A leading space is part of the token, so <code>" is"</code> and <code>"is"</code> are different ids. Rare words split into several tokens; common ones are one. The ids shown on the stage are illustrative, the split is approximate.</dd>
             <dt>Request body</dt><dd>One JSON document: <code>model</code>, <code>system</code>, a <code>messages[]</code> array of alternating user and assistant turns, <code>max_tokens</code>, and <code>stream: true</code> so the answer can arrive piecewise.</dd>
             <dt>Size</dt><dd>A few kilobytes for a fresh chat. Hundreds of kilobytes for a long one, because the whole history travels again every turn. Step 8 is about why.</dd>
@@ -263,6 +323,10 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-2" data-step="2">
         <div class="eyebrow">Step 2 of 8 · the wire</div>
         <h2>Your question crosses the country faster than you blink</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The envelope goes through your Wi-Fi and along glass cables to a building far away, in less time than a blink. At the door, a guard checks that it is really you and points you to the right room.</p>
+        </div>
         <div class="simple">
           <p>The encrypted request hops from your Wi-Fi to your internet provider, then onto long-haul fibre where light carries it at about two thirds of its speed in a vacuum.</p>
           <p>It lands at an <strong>edge point of presence</strong> near a data center. There the provider's <strong>API gateway</strong> opens the encryption, checks who you are and how much you are allowed to send, and routes you to a region that is running the model you asked for. The whole trip takes tens of milliseconds, a fraction of the time you will wait for the first word.</p>
@@ -282,6 +346,10 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-3" data-step="3">
         <div class="eyebrow">Step 3 of 8 · the data center</div>
         <h2>You share the machine with strangers</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>Inside is a huge kitchen with many identical stoves. A host seats you at one that has space. Your order is cooked together with dozens of other people's orders on the same stove. That is why it is cheap.</p>
+        </div>
         <div class="simple">
           <p>The building holds rows of racks, each full of GPUs, with copies of the model, called <strong>replicas</strong>, loaded on many of them. A <strong>scheduler</strong> picks a replica with room for you.</p>
           <p>Your request does not run alone. It is merged into a <strong>batch</strong> with dozens of other people's requests that arrive around the same moment, because running a batch costs almost the same as running one request. This sharing is why a query costs cents rather than dollars.</p>
@@ -301,6 +369,10 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-4" data-step="4">
         <div class="eyebrow">Step 4 of 8 · the GPU node</div>
         <h2>The model is too big for one chip</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The model is a book too heavy for one person, so eight helpers each hold one part and pass notes to each other very quickly. The slow part is not the thinking. It is turning the pages.</p>
+        </div>
         <div class="simple">
           <p>A frontier model's <strong>weights</strong>, the numbers learned in training, run to hundreds of gigabytes. No single chip holds that, so the model is sliced across the eight GPUs in one server, each keeping one eighth in its <strong>high-bandwidth memory</strong> (HBM). Links between the GPUs are fast enough that they behave like one large chip.</p>
           <p>The surprising fact about generating text: the limit is how fast weights can be read out of memory, not how much arithmetic the chips can do. Every token that comes out requires reading the whole model once.</p>
@@ -320,9 +392,14 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-5" data-step="5">
         <div class="eyebrow">Step 5 of 8 · prefill</div>
         <h2>The model reads your whole question at once</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The helpers read your whole question in one go and write a sticky note about every word, so they never have to read it again. That is the pause before the answer starts.</p>
+        </div>
         <div class="simple">
           <p>Now the model runs. In its first pass, called <strong>prefill</strong>, it processes all your tokens simultaneously, layer by layer. Within each layer every token looks back at every earlier token to decide what matters. That mechanism is <strong>attention</strong>.</p>
           <p>As it goes it writes down a compact set of notes about each token, called the <strong>KV cache</strong>, so it never has to re-read the question. Prefill ends when the first token of the answer is ready. The pause before a reply starts to appear is this pass.</p>
+          <p>The profile tokens from step 1 are read here too, by the same attention. "Software developer" and "prefers concise answers" are simply earlier tokens that every later token can look back at. That is the whole mechanism by which your settings shape the reply.</p>
         </div>
         <div class="nerd">
           <span class="tag">Internals</span>
@@ -341,6 +418,10 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-6" data-step="6">
         <div class="eyebrow">Step 6 of 8 · decode</div>
         <h2>One token at a time, sent the instant it exists</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>Then they write the answer one word at a time, checking their sticky notes for each one, and hand every word to the messenger the moment it is written. That is why the answer appears word by word.</p>
+        </div>
         <div class="simple">
           <p>The model produces the answer one token per loop. For each: read the KV cache, score every entry in the vocabulary, pick one, append it to the cache, repeat. A sixty-word answer is about eighty loops of a few milliseconds each.</p>
           <p>Each new token is pushed back down the wire immediately. That is why the answer types out in front of you rather than appearing whole. The model is still writing while you are already reading.</p>
@@ -361,6 +442,10 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-7" data-step="7">
         <div class="eyebrow">Step 7 of 8 · back on your screen</div>
         <h2>The stream is stitched back into text</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>Your app catches the words as they arrive and lays them out into a tidy message. The last note says "done" and how many words were used.</p>
+        </div>
         <div class="simple">
           <p>Your app receives a trickle of small events, each carrying a fragment of text. It appends them to the message bubble as they arrive and renders formatting, headings and lists, as soon as it can tell what they are.</p>
           <p>The final event says why the model stopped, because it finished or hit the length limit, and how many tokens went in and came out. That count is what the bill is based on.</p>
@@ -379,6 +464,10 @@ footer li{margin-bottom:6px}
       <article class="step" id="step-8" data-step="8">
         <div class="eyebrow pink">Step 8 of 8 · your next question</div>
         <h2>The model remembers nothing. The app does.</h2>
+        <div class="plain">
+          <span class="as">Think of it as</span>
+          <p>The helpers forget everything the moment they finish. When you ask another question, your app hands over the whole conversation again. Because the beginning is the same as last time, the kitchen reuses its old sticky notes and only reads the new part.</p>
+        </div>
         <div class="simple">
           <p>You ask a follow-up. The model has no memory of the exchange it just finished. The moment the last token left, it forgot you.</p>
           <p>What makes the conversation continue is your app. It <strong>re-sends the entire transcript</strong>, system prompt, first question, the answer and the new question, on every turn. That is why long chats slow down and cost more.</p>
@@ -391,14 +480,75 @@ footer li{margin-bottom:6px}
             <dt>Prompt caching</dt><dd>Exact prefix match on the token sequence. Cached KV blocks live in HBM or host memory for a time-to-live of about five minutes by default, longer on some tiers. Cache reads are billed at roughly a tenth of the normal input price, cache writes a little above it.</dd>
             <dt>Turn two</dt><dd>Prefill covers only the uncached suffix, so time to first token drops from hundreds of milliseconds to tens. Anything that changes the prefix, a timestamp in the system prompt say, defeats the cache.</dd>
             <dt>Context window</dt><dd>200k to 1M tokens. Usage grows by every turn's input plus output. When full, apps truncate the oldest turns, compact them into a summary, or retrieve relevant past turns instead of sending all of them.</dd>
-            <dt>"Memory" features</dt><dd>A store of facts about you, injected into the system prompt. Useful, but from the model's side it is just more tokens in the request.</dd>
+            <dt>"Memory" features</dt><dd>A store of facts about you, injected into the system prompt. Useful, but from the model's side it is just more tokens in the request. Because the profile block sits at the very front and rarely changes, it is the most reliably cached part of every request; editing your settings invalidates the cache once, then it is warm again.</dd>
           </dl>
+        </div>
+        <div class="caches">
+          <span class="tag">Three caches, one process</span>
+          <ol>
+            <li><b>KV cache</b><span><em>Inside one request</em> (steps 5 and 6). Every engine has it, open or closed. Not optional, never billed on its own.</span></li>
+            <li><b>Prefix cache</b><span><em>Across requests</em> (step 8). Reuses the KV of an identical token prefix. Anthropic has you mark cache breakpoints and bills reads at a discount; OpenAI applies it automatically above about a thousand tokens; vLLM and SGLang do it automatically and for free on hardware you own. A hit changes only step 5.</span></li>
+            <li><b>Answer cache</b><span><em>Before the model</em> (skips steps 2 to 6). An app-level store of whole answers keyed on similar questions. Chat products do not do this, since the same question in a different conversation deserves a different answer. FAQ bots and internal tools do.</span></li>
+          </ol>
         </div>
       </article>
 
     </div>
   </div>
 </main>
+
+<section class="after">
+  <div class="wrap">
+    <div class="eyebrow">After the journey · closed vs open weights</div>
+    <h2>Same eight steps. What changes is who runs them.</h2>
+    <p class="lede">A closed model behind an API, an open-weight model on a hosting platform, and an open-weight model on your own laptop all follow this page. The difference is which steps you can see and control.</p>
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Step</th>
+            <th>Closed model via API<br><span style="font-weight:400;color:var(--muted)">Claude, GPT, Gemini</span></th>
+            <th>Open weights on a host<br><span style="font-weight:400;color:var(--muted)">Llama or DeepSeek on Baseten, Together, your own cluster</span></th>
+            <th>Open weights on your laptop<br><span style="font-weight:400;color:var(--muted)">Ollama, llama.cpp, LM Studio</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1 · device</td><td><span class="you">you</span>Tokenizer is the provider's; you see only counts.</td><td><span class="you">you</span>Tokenizer ships with the weights. You can inspect every id.</td><td><span class="you">you</span>Same tokenizer, running on your machine.</td></tr>
+          <tr><td>2 · wire</td><td><span class="them">provider</span>Their gateway, auth, rate limits, region choice.</td><td><span class="you">you</span>The host's gateway or your own. Limits are yours to set.</td><td><span class="none">skipped</span>Nothing leaves the machine.</td></tr>
+          <tr><td>3 · data center</td><td><span class="them">provider</span>Batched with strangers. Replica count invisible.</td><td><span class="you">you</span>Batched with your own users. You choose replicas and autoscaling.</td><td><span class="none">skipped</span>One machine, one request, no batch.</td></tr>
+          <tr><td>4 · GPU node</td><td><span class="them">provider</span>Chips, sharding and precision chosen for you.</td><td><span class="you">you</span>You pick GPUs, precision and the engine: vLLM, SGLang, TensorRT-LLM.</td><td><span class="you">you</span>One GPU or the CPU. Model shrunk to 4-bit to fit in memory.</td></tr>
+          <tr><td>5 · prefill</td><td><span class="them">provider</span>Same mechanism, hidden. You see time to first token.</td><td><span class="you">you</span>Same mechanism, visible in engine metrics and logs.</td><td><span class="you">you</span>Same mechanism. You can watch memory fill.</td></tr>
+          <tr><td>6 · decode</td><td><span class="them">provider</span>Speed set by their batch and hardware.</td><td><span class="you">you</span>You trade batch size against tokens per second.</td><td><span class="you">you</span>Speed is your laptop's memory bandwidth.</td></tr>
+          <tr><td>7 · screen</td><td><span class="you">you</span>Same stream format.</td><td><span class="you">you</span>Same stream format, usually OpenAI-compatible.</td><td><span class="you">you</span>Same, over localhost.</td></tr>
+          <tr><td>8 · next turn</td><td><span class="them">provider</span>Their prompt cache. Explicit breakpoints or automatic; reads billed at a discount.</td><td><span class="you">you</span>Engine prefix cache, automatic and free. You set how long it lives.</td><td><span class="you">you</span>Engine prefix cache in your own RAM.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="compare-key"><span><span class="you">you</span> you can see or control it</span><span><span class="them">provider</span> it happens, but behind the API</span><span><span class="none">skipped</span> the step does not exist</span></p>
+  </div>
+</section>
+
+<section class="after outputs">
+  <div class="wrap">
+    <div class="eyebrow pink">Other outputs · code and images</div>
+    <h2>Code is text. Images are a different loop.</h2>
+    <p class="lede">This page followed a text answer. Ask for code and nothing changes. Ask for a picture and steps 5 and 6 are replaced.</p>
+    <div class="outputs-grid">
+      <div>
+        <h3>Code generation</h3>
+        <p>Identical to what you just scrolled. Code is text; the tokenizer has entries for <code>def</code>, <code>{</code> and four spaces of indentation like any other fragment. The model decodes one token at a time and streams them. The only differences are in the app: it renders into a code block, may run a linter, and in agent tools it feeds compiler or test output back as the next user turn. Same round trip, run in a loop.</p>
+      </div>
+      <div>
+        <h3>Image generation, diffusion</h3>
+        <p>Steps 1 to 4 are the same: your prompt is tokenized, travels the wire, lands in a batch on a GPU node. Then a text encoder turns the prompt into a conditioning vector once, and the model runs 20 to 50 <strong>denoising steps</strong> over a grid of noise, each step a full pass that nudges every pixel at once. There is no word-by-word loop and no KV cache. A decoder turns the final grid into pixels and one file comes back, not a stream. Some apps show a blurry preview refining, which is those steps.</p>
+      </div>
+      <div>
+        <h3>Image generation, image tokens</h3>
+        <p>Newer multimodal models treat an image as a long sequence of visual tokens and generate it with the same autoregressive decode loop as text, patch by patch, then a decoder renders the patches. This is closer to the page you scrolled, only with thousands of tokens per image and a different vocabulary. Either way, the image itself is not kept in the text KV cache across turns; the app re-attaches it, or its token form, as part of the transcript.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <footer>
   <div class="wrap">
@@ -431,6 +581,7 @@ const NS = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('stage');
 const scenesRoot = document.getElementById('scenes');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let FS = 1; // diagram text multiplier, user-selectable
 
 const C = {
   ink:'#0B0F0C', ink2:'#3F4A43', muted:'#7C877F', grid:'#D9D9D9', rule:'#C9D1CB', ground:'#F5F8F4', paper:'#FFFFFF',
@@ -449,7 +600,7 @@ function el(tag, attrs, parent){
 function text(parent, x, y, str, o){
   o = o || {};
   const t = el('text', {
-    x: x, y: y, 'text-anchor': o.anchor || 'start', 'font-size': o.size || 11,
+    x: x, y: y, 'text-anchor': o.anchor || 'start', 'font-size': ((o.size || 11) * FS).toFixed(2),
     fill: o.fill || C.ink, 'font-weight': o.weight || 400, 'letter-spacing': o.ls || 0,
     opacity: o.opacity, class: (o.sans ? 'sans' : 'mono') + (o.cls ? ' ' + o.cls : '')
   }, parent);
@@ -462,7 +613,7 @@ function label(parent, x, y, str, o){
 }
 function lines(parent, x, y, arr, o){
   o = o || {};
-  const lh = o.lh || 13;
+  const lh = (o.lh || 13) * FS;
   arr.forEach((s, i) => text(parent, x, y + i*lh, s, o));
   return y + arr.length*lh;
 }
@@ -513,13 +664,20 @@ function wire(parent, d, o){
 function pathThrough(pts){
   return pts.map((p,i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
 }
-function frameTitle(s, num, title, caption){
+function frameTitle(s, num, title, caption, plainCaption){
   el('rect', {x:36, y:38, width:22, height:8, fill: s.i === 7 ? C.pink : C.green}, s.g);
   text(s.g, 66, 46, num + ' · ' + title.toUpperCase(), {size:10.5, ls:1, fill:C.ink, weight:500});
   if (caption){
     const ls = wrap(caption, 92);
-    lines(s.g, 36, 592 - (ls.length-1)*14, ls, {size:11.5, fill:C.ink2, sans:true, lh:14});
+    lines(el('g', {class:'plain-hide'}, s.g), 36, 592 - (ls.length-1)*14, ls, {size:11.5, fill:C.ink2, sans:true, lh:14});
   }
+  if (plainCaption){
+    const pg = el('g', {class:'plain-only'}, s.g);
+    el('rect', {x:36, y:574, width:760 - 56, height:30, fill:C.ground}, pg);
+    text(pg, 36, 594, plainCaption, {size:13, fill:C.ink, sans:true, weight:500});
+  }
+  // details group: fades out in Plain
+  s.d = el('g', {class:'plain-hide'}, s.g);
 }
 
 /* characters riding a wire */
@@ -575,14 +733,14 @@ function charsOf(tokens){
   return s.split('').filter(c => c !== ' ');
 }
 const disp = t => t.replace(/^ /, '·');
-function chipWidth(t){ return disp(t).length * 6.1 + 12; }
+function chipWidth(t){ return disp(t).length * 6.1 * FS + 12; }
 function chip(parent, x, y, tok, o){
   o = o || {};
   const w = chipWidth(tok);
   const g = el('g', {}, parent);
   const r = el('rect', {x:x, y:y, width:w, height:18, rx:2, fill:o.fill||C.paper, stroke:o.stroke||C.ink, 'stroke-width':1}, g);
   text(g, x + w/2, y + 12.5, disp(tok), {anchor:'middle', size:10, fill:o.color||C.ink});
-  if (o.id !== false) text(g, x + w/2, y + 29, String(tokId(tok)), {anchor:'middle', size:8, fill:C.muted});
+  if (o.id !== false) text(g, x + w/2, y + 29, String(tokId(tok)), {anchor:'middle', size:8, fill:C.muted, cls:'plain-hide'});
   return {g:g, rect:r, w:w, cx:x + w/2, x:x, y:y};
 }
 function chipRow(parent, x0, y0, tokens, maxX, o){
@@ -603,7 +761,10 @@ function chipRow(parent, x0, y0, tokens, maxX, o){
 /* ---------------- content ---------------- */
 const ANSWER = 'AI is changing what software jobs are more than how many there are. Routine code is increasingly generated, so the value shifts to framing problems, reviewing output, and owning systems end to end.';
 const FOLLOWUP = 'Which roles are safest?';
-const SYSTEM_TOK = 1204;
+const PROVIDER_TOK = 904;   // the app's own instructions
+const PROFILE_TOK = 120;    // what you told it about yourself in settings
+const MEMORY_TOK = 180;     // saved facts from earlier chats
+const SYSTEM_TOK = PROVIDER_TOK + PROFILE_TOK + MEMORY_TOK;
 const HISTORY_TOK = 0; // this is the first turn of a fresh chat; step 8 adds the second
 const KV_PER_TOK = 320 * 1024; // bytes, 80 layers, 8 kv heads x 128, bf16
 const DISTRACT = [' roles', ' work', ' teams', ' tools', ' the', ' more', ' code', ' and', ' how', ' people', ' also', ' new'];
@@ -619,13 +780,15 @@ function makeScene(i, builder){
   const g = el('g', {class:'scene', 'data-scene': i}, scenesRoot);
   const s = {g: g, streams: [], anims: [], i: i};
   builder(s);
+  if (s.d) g.appendChild(s.d); // detail labels paint above card fills drawn later
   scenes.push(s);
   return s;
 }
 
 /* 1 · device */
 function scene1(s){
-  frameTitle(s, '01', 'Your device', 'The sentence is split into tokens, each with a vocabulary id. The app packs them with the system prompt and the earlier turns into one encrypted request.');
+  frameTitle(s, '01', 'Your device', 'The sentence is split into tokens, each with a vocabulary id. The app packs them with the system prompt and the earlier turns into one encrypted request.',
+    'Your words become numbered pieces, sealed in an envelope with the app\'s instructions.');
   const ox = 190, oy = 380;
   cube(s.g, ox, oy, 0, 0, 0, 170, 120, 10, {top:'#F8FAF8'});
   // keyboard hint on base top: a few faint lines
@@ -652,39 +815,52 @@ function scene1(s){
   label(s.g, 430, row.bottom + 12, '· marks a leading space, part of the token', {size:8.5, cls:'nerd-only'});
 
   // request card
-  const cy = Math.max(330, row.bottom + 40);
-  el('rect', {x:430, y:cy, width:340, height:170, fill:C.paper, stroke:C.ink}, s.g);
+  const cy = Math.max(320, row.bottom + 40);
+  el('rect', {x:430, y:cy, width:340, height:200, fill:C.paper, stroke:C.ink}, s.g);
   el('rect', {x:430, y:cy, width:340, height:22, fill:C.ink}, s.g);
   text(s.g, 440, cy + 15, 'POST /v1/messages', {size:10, fill:C.paper, weight:500});
-  text(s.g, 700, cy + 15, 'stream: true', {size:9, fill:C.green, anchor:'end'});
+  text(s.d, 760, cy + 15, 'stream: true', {size:9, fill:C.green, anchor:'end'});
   const short = PROMPT.length > 34 ? PROMPT.slice(0, 33) + '…' : PROMPT;
-  const cardLines = [
-    'system:   "You are a helpful assistant…"',
-    '          ' + fmt(SYSTEM_TOK) + ' tok',
+  const cardLines = FS > 1.1 ? [
+    'system: instructions       ' + fmt(PROVIDER_TOK) + ' tok',
+    '  + your profile           ' + fmt(PROFILE_TOK) + ' tok',
+    '  + saved memories         ' + fmt(MEMORY_TOK) + ' tok',
+    'messages: [ first turn ]',
+    'user: "' + (PROMPT.length > 14 ? PROMPT.slice(0, 13) + '…' : PROMPT) + '"  ' + TOK.length + ' tok',
+    'max_tokens: 1024'
+  ] : [
+    'system:   provider instructions         ' + fmt(PROVIDER_TOK) + ' tok',
+    '          your profile · "software developer,',
+    '          Boston, prefers concise answers"  ' + fmt(PROFILE_TOK) + ' tok',
+    '          saved memories · 14 facts      ' + fmt(MEMORY_TOK) + ' tok',
     'messages: [ first turn of a new chat ]',
-    'user:     "' + short + '"',
-    '          ' + TOK.length + ' tok',
+    'user:     "' + short + '"   ' + TOK.length + ' tok',
     'max_tokens: 1024'
   ];
-  lines(s.g, 440, cy + 42, cardLines, {size:9.5, lh:15, fill:C.ink});
-  el('rect', {x:440, y:cy + 138, width:124, height:18, fill:C.greenTint, stroke:C.greenInk, 'stroke-width':0.8}, s.g);
-  label(s.g, 448, cy + 150.5, 'TLS 1.3 · encrypted', {size:8.5, fill:C.greenInk});
-  text(s.g, 760, cy + 150.5, '≈ ' + fmt((SYSTEM_TOK + HISTORY_TOK + TOK.length) * 4.2 / 1024) + ' KB', {size:9.5, anchor:'end', fill:C.muted});
-  label(s.g, 578, cy + 150.5, 'total ' + fmt(SYSTEM_TOK + HISTORY_TOK + TOK.length) + ' tok', {size:8.5, cls:'nerd-only'});
+  lines(s.d, 440, cy + 42, cardLines, {size:9.5, lh:15, fill:C.ink});
+  // highlight the profile lines
+  el('rect', {x:430, y:cy + 47, width:5, height:44, fill:C.pink}, s.d);
+  el('rect', {x:440, y:cy + 168, width:124, height:18, fill:C.greenTint, stroke:C.greenInk, 'stroke-width':0.8}, s.g);
+  label(s.g, 448, cy + 180.5, 'TLS 1.3 · encrypted', {size:8.5, fill:C.greenInk});
+  text(s.d, 760, cy + 180.5, '≈ ' + fmt((SYSTEM_TOK + HISTORY_TOK + TOK.length) * 4.2 / 1024) + ' KB', {size:9.5, anchor:'end', fill:C.muted});
+  label(s.d, 578, cy + 180.5, 'total ' + fmt(SYSTEM_TOK + HISTORY_TOK + TOK.length) + ' tok', {size:8.5, cls:'nerd-only'});
+  const pg1 = el('g', {class:'plain-only'}, s.g);
+  lines(pg1, 440, cy + 48, ['the envelope holds:', '· the app\'s instructions', '· what it knows about you (your settings)', '· your question, as numbered pieces'], {size:10.5, sans:true, lh:16});
 
   // wire from screen to card
   const start = P(ox, oy, 170, 0, 70);
-  const d = pathThrough([start, [start[0] + 30, start[1]], [start[0] + 30, cy + 90], [428, cy + 90]]);
+  const d = pathThrough([start, [start[0] + 30, start[1]], [start[0] + 30, cy + 110], [428, cy + 110]]);
   const w = wire(s.g, d, {arrow:'arr'});
   s.streams.push(new Stream(s.g, w, charsOf(TOK), {speed:50}));
   // dashed relation tokens -> card
   wire(s.g, pathThrough([[748, row.bottom + 4], [748, cy - 2]]), {dash:'3 4', stroke:C.muted, arrow:'arr'});
-  label(s.g, 740, (row.bottom + cy)/2 + 3, 'becomes messages[last]', {size:8.5, anchor:'end'});
+  label(s.d, 740, (row.bottom + cy)/2 + 3, 'becomes messages[last]', {size:8.5, anchor:'end'});
 }
 
 /* 2 · the wire */
 function scene2(s){
-  frameTitle(s, '02', 'The wire', 'Encrypted, the request hops to your provider, rides long-haul fibre, and is decrypted at an edge near the data center. The gateway checks identity and limits, then routes to a region.');
+  frameTitle(s, '02', 'The wire', 'Encrypted, the request hops to your provider, rides long-haul fibre, and is decrypted at an edge near the data center. The gateway checks identity and limits, then routes to a region.',
+    'The envelope races along glass cables to a distant building. A guard at the door checks it is you.');
   const nodes = [
     {ox:96,  oy:500, w:40, d:40, h:22, name:'your device', sub:''},
     {ox:222, oy:462, w:40, d:40, h:22, name:'wi-fi router', sub:'first hop · ~2 ms'},
@@ -709,31 +885,32 @@ function scene2(s){
   const w = wire(s.g, pathThrough(pts), {sw:1.2});
   s.streams.push(new Stream(s.g, w, charsOf(TOK), {speed:70, n:20}));
   // packet callout near start
-  el('rect', {x:60, y:392, width:150, height:34, fill:C.paper, stroke:C.grid}, s.g);
-  label(s.g, 68, 406, 'one encrypted packet stream', {size:8.5, fill:C.ink});
-  label(s.g, 68, 419, 'contents unreadable in transit', {size:8.5});
+  el('rect', {x:60, y:392, width:150, height:34, fill:C.paper, stroke:C.grid}, s.d);
+  label(s.d, 68, 406, 'one encrypted packet stream', {size:8.5, fill:C.ink});
+  label(s.d, 68, 419, 'contents unreadable in transit', {size:8.5});
   // gateway checks
   const gx = 500, gy = 130;
-  el('rect', {x:gx, y:gy, width:270, height:96, fill:C.paper, stroke:C.ink}, s.g);
-  el('rect', {x:gx, y:gy, width:270, height:20, fill:C.ink}, s.g);
-  text(s.g, gx + 10, gy + 14, 'gateway · before any GPU is touched', {size:9.5, fill:C.paper, weight:500});
-  const checks = ['decrypt TLS', 'API key → org · tier', 'rate limit · req/min · tok/min', 'route → region with model loaded'];
+  el('rect', {x:gx, y:gy, width:270, height:96, fill:C.paper, stroke:C.ink}, s.d);
+  el('rect', {x:gx, y:gy, width:270, height:20, fill:C.ink}, s.d);
+  text(s.d, gx + 10, gy + 14, FS > 1.1 ? 'gateway checks' : 'gateway · before any GPU is touched', {size:9.5, fill:C.paper, weight:500});
+  const checks = FS > 1.1 ? ['decrypt TLS', 'API key → org', 'rate limits', 'route to region'] : ['decrypt TLS', 'API key → org · tier', 'rate limit · req/min · tok/min', 'route → region with model loaded'];
   checks.forEach((c, i) => {
-    el('rect', {x:gx + 10, y:gy + 30 + i*16, width:8, height:8, fill:C.green}, s.g);
-    text(s.g, gx + 24, gy + 37.5 + i*16, c, {size:9.5});
+    el('rect', {x:gx + 10, y:gy + 30 + i*16, width:8, height:8, fill:C.green}, s.d);
+    text(s.d, gx + 24, gy + 37.5 + i*16, c, {size:9.5});
   });
-  wire(s.g, pathThrough([[pts[4][0], pts[4][1] - 6], [pts[4][0], gy + 96]]), {dash:'3 4', stroke:C.muted});
+  wire(s.d, pathThrough([[pts[4][0], pts[4][1] - 6], [pts[4][0], gy + 96]]), {dash:'3 4', stroke:C.muted});
   // total latency
-  label(s.g, 36, 110, 'one-way latency', {fill:C.ink});
+  label(s.g, 36, 110, 'one-way trip', {fill:C.ink});
   text(s.g, 36, 140, '20–80 ms', {size:24, weight:500, sans:true});
-  label(s.g, 36, 156, 'the smallest slice of what you wait for', {size:8.5});
-  label(s.g, 36, 188, 'anycast: same IP announced from many edges', {size:8.5, cls:'nerd-only'});
-  label(s.g, 36, 200, 'routing takes you to the nearest one', {size:8.5, cls:'nerd-only'});
+  label(s.g, 36, 156, 'faster than a blink', {size:8.5});
+  label(s.d, 36, 188, 'anycast: same IP announced from many edges', {size:8.5, cls:'nerd-only'});
+  label(s.d, 36, 200, 'routing takes you to the nearest one', {size:8.5, cls:'nerd-only'});
 }
 
 /* 3 · data center */
 function scene3(s){
-  frameTitle(s, '03', 'The data center', 'A scheduler picks a replica with room. Your request (green) is merged with strangers\' requests into one batch, so one pass through the model serves dozens of people.');
+  frameTitle(s, '03', 'The data center', 'A scheduler picks a replica with room. Your request (green) is merged with strangers\' requests into one batch, so one pass through the model serves dozens of people.',
+    'A host seats you at a stove with space. Your order is cooked together with other people\'s.');
   const ox = 430, oy = 250;
   cube(s.g, ox, oy, 0, 0, 0, 340, 230, 0, {top:C.floor, stroke:C.rule});
   const racks = [];
@@ -746,10 +923,10 @@ function scene3(s){
     if (hot) target = g.topCenter;
   });
   // floor labels (bottom-left, clear of the floor)
-  label(s.g, 36, 500, 'rows of racks · 8 GPUs per node · ~120 kW per rack', {size:8.5});
-  label(s.g, 36, 512, 'liquid cooled · replicas of the model loaded on many', {size:8.5});
-  label(s.g, 36, 534, 'continuous batching: requests join and leave', {size:8.5, cls:'nerd-only'});
-  label(s.g, 36, 546, 'between decode steps, no waiting for the slowest', {size:8.5, cls:'nerd-only'});
+  label(s.d, 36, 500, 'rows of racks · 8 GPUs per node · ~120 kW per rack', {size:8.5});
+  label(s.d, 36, 512, 'liquid cooled · replicas of the model loaded on many', {size:8.5});
+  label(s.d, 36, 534, 'continuous batching: requests join and leave', {size:8.5, cls:'nerd-only'});
+  label(s.d, 36, 546, 'between decode steps, no waiting for the slowest', {size:8.5, cls:'nerd-only'});
   // scheduler
   const sch = cube(s.g, ox, oy, -120, 190, 0, 40, 40, 30, {top:C.paper});
   label(s.g, sch.topCenter[0], sch.topCenter[1] + 62, 'scheduler', {fill:C.ink, anchor:'middle'});
@@ -769,20 +946,24 @@ function scene3(s){
   s.streams.push(new Stream(s.g, toRack, charsOf(TOK).concat(['a','b','0','1']), {speed:60, n:10}));
   // stats
   const sx = 36, sy = 90;
-  label(s.g, sx, sy, 'this request', {fill:C.ink});
+  label(s.d, sx, sy, 'this request', {fill:C.ink});
   const stats = [['replica', '27 / 64'], ['batch', '48 requests'], ['queue', '3 ms'], ['one pass', 'serves all 48']];
   stats.forEach((st, i) => {
-    label(s.g, sx, sy + 22 + i*20, st[0], {size:8.5});
-    text(s.g, sx + 70, sy + 22 + i*20, st[1], {size:11, weight:500});
+    label(s.d, sx, sy + 22 + i*20, st[0], {size:8.5});
+    text(s.d, sx + 70, sy + 22 + i*20, st[1], {size:11, weight:500});
   });
+  const pg3 = el('g', {class:'plain-only'}, s.g);
+  label(pg3, sx, sy, 'your order', {fill:C.ink});
+  text(pg3, sx, sy + 26, 'cooked with 47 others', {size:14, sans:true, weight:500});
   // building label
-  label(s.g, 700, 96, '100 MW – 1 GW site', {anchor:'end', fill:C.ink});
-  label(s.g, 700, 108, 'you touch one rack for ~1 s', {anchor:'end', size:8.5});
+  label(s.d, 700, 96, '100 MW – 1 GW site', {anchor:'end', fill:C.ink});
+  label(s.d, 700, 108, 'you touch one rack for ~1 s', {anchor:'end', size:8.5});
 }
 
 /* 4 · GPU node */
 function scene4(s){
-  frameTitle(s, '04', 'The GPU node', 'Eight GPUs in one server, each holding one eighth of the weights in high-bandwidth memory, joined by NVLink so they act as one chip. Every output token means reading all of it once.');
+  frameTitle(s, '04', 'The GPU node', 'Eight GPUs in one server, each holding one eighth of the weights in high-bandwidth memory, joined by NVLink so they act as one chip. Every output token means reading all of it once.',
+    'Eight helpers each hold one part of a book too heavy for one person, and pass notes between them.');
   const ox = 450, oy = 230;
   cube(s.g, ox, oy, 0, 0, 0, 300, 190, 6, {top:'#F8FAF8', stroke:C.rule});
   const items = [];
@@ -833,19 +1014,22 @@ function scene4(s){
     ['per GPU', '≈ 50 GB · one eighth']
   ];
   rows.forEach((r, i) => {
-    label(s.g, sx, 158 + i*20, r[0], {size:8.5});
-    text(s.g, sx + 60, 158 + i*20, r[1], {size:10.5, weight:500});
+    label(s.d, sx, 158 + i*20, r[0], {size:8.5});
+    text(s.d, sx + 60, 158 + i*20, r[1], {size:10.5, weight:500});
   });
-  label(s.g, sx, 252, 'each output token re-reads all 400 GB', {size:8.5, fill:C.pinkInk});
-  label(s.g, sx, 264, 'memory-bound, not compute-bound', {size:8.5, fill:C.pinkInk});
-  label(s.g, sx, 290, 'tensor parallel: each layer split 8 ways,', {size:8.5, cls:'nerd-only'});
-  label(s.g, sx, 302, 'all-reduce over NVLink after every layer', {size:8.5, cls:'nerd-only'});
-  label(s.g, sx, 314, 'at batch 64, one read of weights → 64 tokens', {size:8.5, cls:'nerd-only'});
+  label(s.d, sx, 252, 'each output token re-reads all 400 GB', {size:8.5, fill:C.pinkInk});
+  label(s.d, sx, 264, 'memory-bound, not compute-bound', {size:8.5, fill:C.pinkInk});
+  label(s.d, sx, 290, 'tensor parallel: each layer split 8 ways,', {size:8.5, cls:'nerd-only'});
+  label(s.d, sx, 302, 'all-reduce over NVLink after every layer', {size:8.5, cls:'nerd-only'});
+  label(s.d, sx, 314, 'at batch 64, one read of weights → 64 tokens', {size:8.5, cls:'nerd-only'});
+  const pg4 = el('g', {class:'plain-only'}, s.g);
+  lines(pg4, sx, 160, ['each holds one eighth of the model', 'the slow part is turning the pages,', 'not the thinking'], {size:11, sans:true, lh:16, fill:C.ink2});
 }
 
 /* 5 · prefill */
 function scene5(s){
-  frameTitle(s, '05', 'Prefill', 'All prompt tokens are processed at once, layer by layer. Each token attends to every earlier one, and its keys and values are written to the KV cache so the question is never re-read.');
+  frameTitle(s, '05', 'Prefill', 'All prompt tokens are processed at once, layer by layer. Each token attends to every earlier one, and its keys and values are written to the KV cache so the question is never re-read.',
+    'The helpers read your whole question once and write a sticky note about every word.');
   label(s.g, 36, 92, 'your ' + TOK.length + ' tokens · processed in parallel', {fill:C.ink});
   const row = chipRow(s.g, 36, 150, TOK, 770, {id:false, fill:C.greenTint, stroke:C.greenInk});
   const chips = row.chips;
@@ -860,13 +1044,15 @@ function scene5(s){
     el('path', {d: 'M' + x1 + ' ' + (c.y) + ' Q ' + ((x1+x2)/2) + ' ' + (c.y - hgt) + ' ' + x2 + ' ' + last.y,
       fill:'none', stroke:C.ink, 'stroke-width': (0.5 + w*1.2).toFixed(2), opacity: (0.25 + w*0.6).toFixed(2)}, arcs);
   });
-  label(s.g, 36, row.bottom + 14, 'attention: the last token weighs every earlier token · line weight = weight', {size:8.5});
-  label(s.g, 36, row.bottom + 26, 'softmax(Q_i · K_j / √d) · causal, j ≤ i', {size:8.5, cls:'nerd-only'});
+  label(s.d, 36, row.bottom + 14, 'attention: the last token weighs every earlier token · line weight = weight', {size:8.5});
+  label(s.d, 36, row.bottom + 26, 'softmax(Q_i · K_j / √d) · causal, j ≤ i', {size:8.5, cls:'nerd-only'});
+  label(el('g', {class:'plain-only'}, s.g), 36, row.bottom + 14, 'each word looks back at the words before it', {size:8.5});
 
   // KV grid
   const rowsN = 12, n = TOK.length;
   const gx = 72, gy = Math.max(300, row.bottom + 60), cw = Math.min(26, Math.floor(470 / n)), ch = 17;
-  label(s.g, 36, gy - 12, 'KV cache · one row per layer · one column per token', {fill:C.ink});
+  label(s.d, 36, gy - 12, 'KV cache · one row per layer · one column per token', {fill:C.ink});
+  label(el('g', {class:'plain-only'}, s.g), 36, gy - 12, 'sticky notes · one column per word', {fill:C.ink});
   const cells = [];
   for (let r = 0; r < rowsN; r++){
     label(s.g, gx - 6, gy + r*ch + 12, 'L' + (r+1), {size:8, anchor:'end'});
@@ -888,25 +1074,29 @@ function scene5(s){
   });
   // right column facts
   const rx = 560, ry = gy;
-  label(s.g, rx, ry + 6, 'written this pass', {fill:C.ink});
-  text(s.g, rx, ry + 38, (n * KV_PER_TOK / 1048576).toFixed(1) + ' MB', {size:24, weight:500, sans:true});
-  label(s.g, rx, ry + 54, n + ' tok × 320 KB per token', {size:8.5});
-  label(s.g, rx, ry + 84, 'same for 100k tokens', {size:8.5});
-  text(s.g, rx, ry + 106, '≈ 32 GB', {size:18, weight:500, sans:true});
-  label(s.g, rx, ry + 122, 'on top of the weights', {size:8.5});
-  label(s.g, rx, ry + 150, 'time to first token', {size:8.5});
+  label(s.d, rx, ry + 6, 'written this pass', {fill:C.ink});
+  text(s.d, rx, ry + 38, (n * KV_PER_TOK / 1048576).toFixed(1) + ' MB', {size:24, weight:500, sans:true});
+  label(s.d, rx, ry + 54, n + ' tok × 320 KB per token', {size:8.5});
+  label(s.d, rx, ry + 84, 'same for 100k tokens', {size:8.5});
+  text(s.d, rx, ry + 106, '≈ 32 GB', {size:18, weight:500, sans:true});
+  label(s.d, rx, ry + 122, 'on top of the weights', {size:8.5});
+  label(s.g, rx, ry + 150, 'the pause before the answer', {size:8.5});
   text(s.g, rx, ry + 170, '0.2 – 2 s', {size:18, weight:500, sans:true});
-  label(s.g, rx, ry + 186, '2 × 80 layers × 8 heads × 128 × 2 B', {size:8, cls:'nerd-only'});
-  label(s.g, rx, ry + 198, 'compute-bound · grows with prompt', {size:8, cls:'nerd-only'});
+  label(s.d, rx, ry + 186, '2 × 80 layers × 8 heads × 128 × 2 B', {size:8, cls:'nerd-only'});
+  label(s.d, rx, ry + 198, 'compute-bound · grows with prompt', {size:8, cls:'nerd-only'});
 }
 
 /* 6 · decode */
 function scene6(s){
-  frameTitle(s, '06', 'Decode', 'One loop per token: read the cache, score the vocabulary, sample one, append it to the cache (pink), push it down the wire. The answer types out while the model is still writing.');
+  frameTitle(s, '06', 'Decode', 'One loop per token: read the cache, score the vocabulary, sample one, append it to the cache (pink), push it down the wire. The answer types out while the model is still writing.',
+    'They write one word at a time, checking their notes, and hand each word to the messenger right away.');
   const n = TOK.length, A = ANS.length, total = n + A, rowsN = 12;
   const gx = 64, gy = 128, cw = Math.max(3, Math.min(9, Math.floor(230 / total))), ch = 12;
-  label(s.g, 36, 96, 'KV cache', {fill:C.ink});
-  label(s.g, 36, 108, 'green: prompt · pink: generated so far', {size:8.5});
+  label(s.d, 36, 96, 'KV cache', {fill:C.ink});
+  label(s.d, 36, 108, 'green: prompt · pink: generated so far', {size:8.5});
+  const pg6 = el('g', {class:'plain-only'}, s.g);
+  label(pg6, 36, 96, 'sticky notes', {fill:C.ink});
+  label(pg6, 36, 108, 'green: your words · pink: the answer so far', {size:8.5});
   const cols = [];
   for (let c = 0; c < total; c++){
     cols[c] = [];
@@ -916,16 +1106,19 @@ function scene6(s){
     }
   }
   for (let r = 0; r < rowsN; r++) label(s.g, gx - 5, gy + r*ch + 9, 'L' + (r+1), {size:7, anchor:'end'});
-  const counter = text(s.g, 36, gy + rowsN*ch + 28, '', {size:11, weight:500});
-  label(s.g, 36, gy + rowsN*ch + 42, 'cache grows by 320 KB per token', {size:8.5, cls:'nerd-only'});
+  const counter = text(s.d, 36, gy + rowsN*ch + 28, '', {size:11, weight:500});
+  label(s.d, 36, gy + rowsN*ch + 42, 'cache grows by 320 KB per token', {size:8.5, cls:'nerd-only'});
 
   // sampling panel
   const px = 320, py = 96;
-  label(s.g, px, py, 'next token · top of the vocabulary', {fill:C.ink});
-  el('rect', {x:px, y:py + 10, width:200, height:150, fill:C.paper, stroke:C.ink}, s.g);
-  const barG = el('g', {}, s.g);
-  label(s.g, px, py + 176, 'temperature 1.0 · top-p 0.95', {size:8.5, cls:'nerd-only'});
-  label(s.g, px, py + 188, 'logits → softmax → sample one id', {size:8.5, cls:'nerd-only'});
+  label(s.d, px, py, 'next token · top of the vocabulary', {fill:C.ink});
+  el('rect', {x:px, y:py + 10, width:200, height:150, fill:C.paper, stroke:C.ink}, s.d);
+  const barG = el('g', {}, s.d);
+  label(s.d, px, py + 176, 'temperature 1.0 · top-p 0.95', {size:8.5, cls:'nerd-only'});
+  label(s.d, px, py + 188, 'logits → softmax → sample one id', {size:8.5, cls:'nerd-only'});
+  const pg6b = el('g', {class:'plain-only'}, s.g);
+  label(pg6b, px, py, 'picking the next word', {fill:C.ink});
+  lines(pg6b, px, py + 30, ['the model guesses which word', 'comes next, one at a time'], {size:11, sans:true, lh:16, fill:C.ink2});
 
   // answer card
   const ax = 550, ay = 96;
@@ -940,7 +1133,8 @@ function scene6(s){
   const back = wire(s.g, pathThrough([[ax + 110, ay + 222], [ax + 110, 400], [150, 400], dev.topCenter]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink'});
   const st = new Stream(s.g, back, charsOf(ANS), {speed:75, fill:C.pinkInk, n:18});
   s.streams.push(st);
-  label(s.g, 330, 420, 'streamed back as server-sent events · each token as soon as it exists', {size:8.5, fill:C.pinkInk});
+  label(s.d, 330, 420, 'streamed back as server-sent events · each token as soon as it exists', {size:8.5, fill:C.pinkInk});
+  label(el('g', {class:'plain-only'}, s.g), 330, 420, 'each word travels back the moment it is written', {size:8.5, fill:C.pinkInk});
 
   const stepDur = 0.14, period = (A + 12) * stepDur;
   let lastK = -1;
@@ -998,7 +1192,8 @@ function scene6(s){
 
 /* 7 · screen */
 function scene7(s){
-  frameTitle(s, '07', 'Back on your screen', 'The app appends each event\'s fragment to the bubble and renders formatting as it becomes clear. The last event carries why the model stopped and how many tokens were used.');
+  frameTitle(s, '07', 'Back on your screen', 'The app appends each event\'s fragment to the bubble and renders formatting as it becomes clear. The last event carries why the model stopped and how many tokens were used.',
+    'Your app lays the words out into a tidy message as they arrive. The last note says "done".');
   const ox = 230, oy = 400;
   cube(s.g, ox, oy, 0, 0, 0, 300, 110, 10, {top:'#F8FAF8'});
   const plane = screenPlane(s.g, ox, oy, 0, 0, 10, 300, 180);
@@ -1016,9 +1211,12 @@ function scene7(s){
   label(s.g, 36, 262, 'rendering the stream', {size:8.5});
   // SSE feed
   const fx = 520, fy = 96;
-  label(s.g, fx, fy, 'server-sent events · text/event-stream', {fill:C.ink});
-  el('rect', {x:fx, y:fy + 10, width:250, height:150, fill:C.paper, stroke:C.ink}, s.g);
-  const feed = el('g', {}, s.g);
+  label(s.d, fx, fy, 'server-sent events · text/event-stream', {fill:C.ink});
+  el('rect', {x:fx, y:fy + 10, width:250, height:150, fill:C.paper, stroke:C.ink}, s.d);
+  const feed = el('g', {}, s.d);
+  const pg7 = el('g', {class:'plain-only'}, s.g);
+  label(pg7, fx, fy, 'words arriving', {fill:C.ink});
+  lines(pg7, fx, fy + 30, ['one small parcel per word,', 'in order, as fast as they are written'], {size:11, sans:true, lh:16, fill:C.ink2});
   const A = ANS.length;
   let lastK = -1;
   s.anims.push(t => {
@@ -1044,25 +1242,28 @@ function scene7(s){
   // arrow from feed to screen
   const w = wire(s.g, pathThrough([[fx, fy + 85], [fx - 24, fy + 85], [fx - 24, 300], [ox + 300*0.866 + 4, 300]]), {stroke:C.pinkInk, dash:'3 4', arrow:'arr-pink'});
   // stats
-  label(s.g, fx, 290, 'this reply', {fill:C.ink});
+  label(s.d, fx, 290, 'this reply', {fill:C.ink});
   const rows = [['stop_reason', 'end_turn'], ['input tokens', fmt(SYSTEM_TOK + HISTORY_TOK + TOK.length)], ['output tokens', String(A)], ['time to first token', '≈ 380 ms'], ['total', '≈ ' + (0.38 + A/70).toFixed(1) + ' s']];
   rows.forEach((r, i) => {
-    label(s.g, fx, 312 + i*20, r[0], {size:8.5});
-    text(s.g, fx + 250, 312 + i*20, r[1], {size:10.5, weight:500, anchor:'end'});
+    label(s.d, fx, 312 + i*20, r[0], {size:8.5});
+    text(s.d, fx + 250, 312 + i*20, r[1], {size:10.5, weight:500, anchor:'end'});
   });
-  label(s.g, fx, 420, 'deltas are text fragments, not always whole', {size:8, cls:'nerd-only'});
-  label(s.g, fx, 432, 'tokens · markdown re-parsed on every one', {size:8, cls:'nerd-only'});
-  label(s.g, fx, 444, 'usage is what the bill is based on', {size:8, cls:'nerd-only'});
+  label(s.d, fx, 420, 'deltas are text fragments, not always whole', {size:8, cls:'nerd-only'});
+  label(s.d, fx, 432, 'tokens · markdown re-parsed on every one', {size:8, cls:'nerd-only'});
+  label(s.d, fx, 444, 'usage is what the bill is based on', {size:8, cls:'nerd-only'});
+  label(pg7, fx, 290, 'the last note', {fill:C.ink});
+  lines(pg7, fx, 312, ['"done" · ' + A + ' words used'], {size:11, sans:true, lh:16, fill:C.ink2});
 }
 
 /* 8 · next turn */
 function scene8(s){
-  frameTitle(s, '08', 'Your next question', 'The app re-sends the whole transcript. The server matches the unchanged prefix against its cache and skips its prefill (green); only the new question (pink) is processed. The model itself keeps nothing.');
+  frameTitle(s, '08', 'Your next question', 'The app re-sends the whole transcript. The server matches the unchanged prefix against its cache and skips its prefill (green); only the new question (pink) is processed. The model itself keeps nothing.',
+    'The whole conversation is handed over again. Old sticky notes are reused; only the new part is read.');
   const n = TOK.length, A = ANS.length, f = FUP.length;
   const total = SYSTEM_TOK + n + A + f;
-  const ox = 250, oy = 330;
+  const ox = 264, oy = 330;
   const slabs = [
-    {name:'system prompt', tok:SYSTEM_TOK, top:C.paper},
+    {name:'system · profile · memories', tok:SYSTEM_TOK, top:C.paper},
     {name:'user ① · turn 1', tok:n, top:C.greenTint},
     {name:'assistant ①', tok:A, top:C.paper},
     {name:'user ② · new', tok:f, top:C.pink}
@@ -1073,7 +1274,7 @@ function scene8(s){
     cube(s.g, ox, oy, 0, 0, z, 150, 90, 14, {top:sl.top});
     const corner = P(ox, oy, 0, 90, z + 7);
     el('line', {x1:corner[0] - 4, y1:corner[1], x2:corner[0] - 26, y2:corner[1], stroke:C.rule}, s.g);
-    label(s.g, corner[0] - 30, corner[1] - 2, sl.name, {anchor:'end', fill: i === 3 ? C.pinkInk : C.ink, size:9});
+    label(s.g, corner[0] - 30, corner[1] - 2, sl.name, {anchor:'end', fill: i === 3 ? C.pinkInk : C.ink, size: i === 0 ? 7.5 : 9});
     label(s.g, corner[0] - 30, corner[1] + 9, fmt(sl.tok) + ' tok', {anchor:'end', size:8});
   });
   label(s.g, 36, 470, 'the follow-up', {size:8.5});
@@ -1085,35 +1286,38 @@ function scene8(s){
   const w = wire(s.g, pathThrough([start, [start[0] + 26, start[1]], [start[0] + 26, bary + 15], [rx - 4, bary + 15]]), {arrow:'arr'});
   s.streams.push(new Stream(s.g, w, charsOf(TOK).concat(charsOf(FUP)), {speed:60, n:12}));
   const tl = label(s.g, 0, 0, 'whole transcript re-sent · ' + fmt(total) + ' tok', {size:8.5, anchor:'middle'});
-  tl.setAttribute('transform', 'translate(' + (start[0] + 40) + ' ' + ((start[1] + bary + 15)/2) + ') rotate(-90)');
+  tl.setAttribute('transform', 'translate(' + (start[0] + 54) + ' ' + ((start[1] + bary + 15)/2) + ') rotate(-90)');
   // kv bar
   const bw = 330;
   const frac = (total - f) / total;
-  label(s.g, rx, bary - 12, 'server · KV cache for this request', {fill:C.ink});
+  label(s.d, rx, bary - 12, 'server · KV cache for this request', {fill:C.ink});
+  label(el('g', {class:'plain-only'}, s.g), rx, bary - 12, 'the kitchen\'s sticky notes', {fill:C.ink});
   const hit = el('rect', {x:rx, y:bary, width:(bw*frac).toFixed(1), height:30, fill:C.green, stroke:C.ink}, s.g);
   el('rect', {x:rx + bw*frac, y:bary, width:(bw*(1-frac)).toFixed(1), height:30, fill:C.pink, stroke:C.ink}, s.g);
-  text(s.g, rx + 8, bary + 19, 'PREFIX · ' + fmt(total - f) + ' tok · CACHE HIT · prefill skipped', {size:8.5, weight:500, fill:C.ink, ls:0.4});
-  label(s.g, rx + bw, bary + 44, 'new · ' + f + ' tok · prefill', {anchor:'end', size:8.5, fill:C.pinkInk});
-  label(s.g, rx, bary + 44, 'exact match on the token prefix', {size:8.5, cls:'nerd-only'});
+  text(s.d, rx + 8, bary + 19, 'PREFIX · ' + fmt(total - f) + ' tok · CACHE HIT · prefill skipped', {size:8.5, weight:500, fill:C.ink, ls:0.4});
+  text(el('g', {class:'plain-only'}, s.g), rx + 8, bary + 19, 'ALREADY READ LAST TIME · REUSED', {size:8.5, weight:500, fill:C.ink, ls:0.4});
+  label(s.d, rx + bw, bary + 44, 'new · ' + f + ' tok · prefill', {anchor:'end', size:8.5, fill:C.pinkInk});
+  label(el('g', {class:'plain-only'}, s.g), rx + bw, bary + 44, 'new · read now', {anchor:'end', size:8.5, fill:C.pinkInk});
+  label(s.d, rx, bary + 44, 'exact match on the token prefix', {size:8.5, cls:'nerd-only'});
   s.anims.push(t => hit.setAttribute('fill-opacity', (0.7 + 0.3*Math.sin(t*3)).toFixed(2)));
   // turn comparison
   const cy = 240;
-  label(s.g, rx, cy, 'time to first token', {fill:C.ink});
+  label(s.d, rx, cy, 'time to first token', {fill:C.ink});
   const cmp = [['turn 1 · no cache', total - f, '≈ 400 ms', C.grid], ['turn 2 · cache hit', f, '≈ 90 ms', C.pink]];
   cmp.forEach((c, i) => {
     const y = cy + 16 + i*34;
-    label(s.g, rx, y + 4, c[0], {size:8.5});
-    el('rect', {x:rx, y:y + 9, width:bw, height:10, fill:C.paper, stroke:C.grid}, s.g);
-    el('rect', {x:rx, y:y + 9, width:(i === 0 ? bw*0.92 : bw*0.2).toFixed(1), height:10, fill:c[3]}, s.g);
-    text(s.g, rx + bw, y + 4, c[2] + ' · prefill ' + fmt(c[1]) + ' tok', {size:9, anchor:'end', weight:500});
+    label(s.d, rx, y + 4, c[0], {size:8.5});
+    el('rect', {x:rx, y:y + 9, width:bw, height:10, fill:C.paper, stroke:C.grid}, s.d);
+    el('rect', {x:rx, y:y + 9, width:(i === 0 ? bw*0.92 : bw*0.2).toFixed(1), height:10, fill:c[3]}, s.d);
+    text(s.d, rx + bw, y + 4, c[2] + ' · prefill ' + fmt(c[1]) + ' tok', {size:9, anchor:'end', weight:500});
   });
   // context window
   const wy = 340;
-  label(s.g, rx, wy, 'context window · 200,000 tok', {fill:C.ink});
-  el('rect', {x:rx, y:wy + 10, width:bw, height:14, fill:C.paper, stroke:C.ink}, s.g);
-  el('rect', {x:rx, y:wy + 10, width:Math.max(6, bw*total/200000).toFixed(1), height:14, fill:C.green}, s.g);
-  text(s.g, rx + bw, wy, fmt(total) + ' used · ' + (100*total/200000).toFixed(1) + '%', {size:9, anchor:'end', weight:500});
-  label(s.g, rx, wy + 38, 'grows every turn · when full: summarize or drop old turns', {size:8.5});
+  label(s.d, rx, wy, 'context window · 200,000 tok', {fill:C.ink});
+  el('rect', {x:rx, y:wy + 10, width:bw, height:14, fill:C.paper, stroke:C.ink}, s.d);
+  el('rect', {x:rx, y:wy + 10, width:Math.max(6, bw*total/200000).toFixed(1), height:14, fill:C.green}, s.d);
+  text(s.d, rx + bw, wy, fmt(total) + ' used · ' + (100*total/200000).toFixed(1) + '%', {size:9, anchor:'end', weight:500});
+  label(s.d, rx, wy + 38, 'grows every turn · when full: summarize or drop old turns', {size:8.5});
   // what persists
   const py = 420;
   label(s.g, rx, py, 'what persists after this call', {fill:C.ink});
@@ -1124,8 +1328,8 @@ function scene8(s){
     label(s.g, rx + 16, y, p[0], {size:8.5});
     text(s.g, rx + 100, y, p[1], {size:10.5, weight:500, fill:p[2]});
   });
-  label(s.g, rx, py + 84, 'cache reads bill at ~10% of input price', {size:8, cls:'nerd-only'});
-  label(s.g, rx, py + 96, 'a changed byte in the prefix defeats the cache', {size:8, cls:'nerd-only'});
+  label(s.d, rx, py + 84, 'cache reads bill at ~10% of input price', {size:8, cls:'nerd-only'});
+  label(s.d, rx, py + 96, 'a changed byte in the prefix defeats the cache', {size:8, cls:'nerd-only'});
 }
 
 const BUILDERS = [scene1, scene2, scene3, scene4, scene5, scene6, scene7, scene8];
@@ -1180,7 +1384,18 @@ function setDepth(d){
   try { localStorage.setItem('prt-depth', d); } catch(e){}
 }
 depthBtns.forEach(b => b.addEventListener('click', () => setDepth(b.dataset.depth)));
-try { const saved = localStorage.getItem('prt-depth'); if (saved === 'nerd' || saved === 'simple') setDepth(saved); } catch(e){}
+try { const saved = localStorage.getItem('prt-depth'); if (saved === 'nerd' || saved === 'simple' || saved === 'plain') setDepth(saved); } catch(e){}
+
+/* diagram text size */
+const fsBtns = Array.from(document.querySelectorAll('.textsize button'));
+function setFS(v){
+  FS = v;
+  fsBtns.forEach(b => b.setAttribute('aria-pressed', String(parseFloat(b.dataset.fs) === v)));
+  try { localStorage.setItem('prt-fs', String(v)); } catch(e){}
+  buildAll();
+}
+fsBtns.forEach(b => b.addEventListener('click', () => setFS(parseFloat(b.dataset.fs))));
+try { const sv = parseFloat(localStorage.getItem('prt-fs')); if (sv === 1.25 || sv === 1.5) FS = sv; fsBtns.forEach(b => b.setAttribute('aria-pressed', String(parseFloat(b.dataset.fs) === FS))); } catch(e){}
 
 /* prompt editing */
 const input = document.getElementById('prompt');

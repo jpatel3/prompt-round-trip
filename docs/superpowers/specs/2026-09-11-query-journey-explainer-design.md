@@ -83,3 +83,13 @@ common suffixes) with fake but stable IDs. Card text says it is approximate.
   to mobile width.
 - Automated: headless Chrome screenshot of each step (script in `tools/`), if
   Chrome is available.
+
+## Addendum (2026-09-11, same day)
+
+Approved in chat after the first build:
+
+- **Third depth level, Plain.** Toggle is Plain / Simple / Nerd; Simple stays the default. Each card has a `.plain` block: one paragraph with an everyday analogy (envelope, kitchen, helpers holding a heavy book, sticky notes). On the stage, detail blocks live in a per-scene `plain-hide` group that fades out in Plain and `plain-only` labels fade in; each scene has a plain caption.
+- **Profile and preferences.** Step 1 shows the system prompt composed of provider instructions, the user's profile ("software developer, Boston, prefers concise answers") and saved memories, with copy explaining that settings enter the request here as ordinary tokens; step 5 notes the same attention reads them; step 8 notes the profile block is the most reliably cached prefix.
+- **Three caches strip** in step 8 (hidden in Plain): KV cache inside one request, prefix cache across requests, answer cache before the model.
+- **After the journey** sections: a "who runs which step" table for closed API vs hosted open weights vs laptop, and a three-column note on code generation (identical), diffusion image generation (steps 5 and 6 replaced) and image-token generation.
+- **Diagram text size** control (1×, 1.25×, 1.5×) applied as a multiplier in the SVG text helper; scenes rebuild on change; a few dense strings switch to compact variants above 1.1×.

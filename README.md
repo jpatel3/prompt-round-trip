@@ -2,7 +2,9 @@
 
 An interactive, scroll-driven explainer of what happens when you send a question to Claude or ChatGPT: from your keyboard, over the wire, into a data center, across eight GPUs, through prefill and decode, back to your screen, and then how the next question knows about the last one.
 
-Eight steps, each with an animated isometric scene on a sticky stage and a card that explains what the thing is and how it works. A **Simple / Nerd** toggle adds the internals (formulas, sizes, protocol details). The prompt is editable and its tokens ride the wires.
+Eight steps, each with an animated isometric scene on a sticky stage and a card that explains what the thing is and how it works. A **Plain / Simple / Nerd** toggle sets the depth: Plain is jargon-free with an everyday analogy per step and a quieter stage; Nerd adds the internals (formulas, sizes, protocol details). A diagram text-size control (A / A+ / A++) enlarges the stage labels. The prompt is editable and its tokens ride the wires.
+
+After the eight steps: where your profile and preferences enter the request (step 1) and why they shape the answer (step 5); the three caches and which step each changes (step 8); a comparison of who runs which step for a closed API, hosted open weights, and a laptop; and how code and image generation differ.
 
 ## Running it
 
