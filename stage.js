@@ -93,25 +93,32 @@ function frameTitle(s, num, title, caption, plainCaption){
   el('rect', {x:36, y:38, width:22, height:8, fill: s.accent || (s.i === 7 ? C.pink : C.green)}, s.g);
   text(s.g, 66, 46, num + ' · ' + title.toUpperCase(), {size:10.5, ls:1, fill:C.ink, weight:500});
   if (caption){
-    const ls = wrap(caption, 92);
-    lines(el('g', {class:'plain-hide'}, s.g), 36, 592 - (ls.length-1)*14, ls, {size:11.5, fill:C.ink2, sans:true, lh:14});
+    // wrap by available width: the frame is 728px wide, sans at 11.5px is about 5.6px per char
+    const ls = wrap(caption, Math.floor(126 / FS / 1.4)).slice(0, 4);
+    const lh = 14;
+    lines(el('g', {class:'plain-hide'}, s.g), 36, 592 - (ls.length-1)*lh*FS, ls, {size:11.5, fill:C.ink2, sans:true, lh:lh});
   }
   if (plainCaption){
     const pg = el('g', {class:'plain-only'}, s.g);
-    el('rect', {x:36, y:574, width:760 - 56, height:30, fill:C.ground}, pg);
-    text(pg, 36, 594, plainCaption, {size:13, fill:C.ink, sans:true, weight:500});
+    const ls = wrap(plainCaption, Math.floor(104 / FS));
+    const lh = 16;
+    el('rect', {x:36, y:594 - ls.length*lh*FS - 4, width:760 - 56, height:ls.length*lh*FS + 14, fill:C.ground}, pg);
+    lines(pg, 36, 594 - (ls.length-1)*lh*FS, ls, {size:13, fill:C.ink, sans:true, weight:500, lh:lh});
   }
   // details group: fades out in Plain; re-appended last so it paints above card fills
   s.d = el('g', {class:'plain-hide'}, s.g);
 }
 /* a simple chat bubble in plane or screen coordinates */
-function bubble(parent, x, y, w, linesArr, o){
+function bubble(parent, x, y, w, content, o){
   o = o || {};
   const lh = o.lh || 11, size = o.size || 8, pad = o.pad || 8;
-  const h = pad*2 + linesArr.length*lh - 3;
+  // a string is wrapped to the bubble's width at the current text size; an array is used as given
+  let arr = Array.isArray(content) ? content : wrap(content, Math.max(8, Math.floor((w - pad*2) / (size * FS * 0.53))));
+  if (o.maxLines && arr.length > o.maxLines){ arr = arr.slice(0, o.maxLines); arr[arr.length-1] = arr[arr.length-1].replace(/\s*\S*$/, '') + '…'; }
+  const h = pad*2 + arr.length*lh*FS - 3;
   el('rect', {x:x, y:y, width:w, height:h, rx:o.rx == null ? 4 : o.rx, fill:o.fill||C.paper, stroke:o.stroke||C.grid, 'stroke-width':o.sw||0.8}, parent);
-  lines(parent, x + pad, y + pad + size, linesArr, {size:size, sans:true, lh:lh, fill:o.color||C.ink});
-  return {x:x, y:y, w:w, h:h, bottom:y + h};
+  lines(parent, x + pad, y + pad + size*FS, arr, {size:size, sans:true, lh:lh, fill:o.color||C.ink});
+  return {x:x, y:y, w:w, h:h, bottom:y + h, lines:arr, lastLine:arr[arr.length-1] || ''};
 }
 /* a small padlock glyph */
 function lock(parent, x, y, o){
@@ -248,7 +255,7 @@ function onScroll(){
     const vh = window.innerHeight;
     const wrapEl = document.getElementById('stage-wrap');
     const stageBox = wrapEl ? wrapEl.getBoundingClientRect() : {bottom: vh * 0.5};
-    const pivot = window.innerWidth <= 900 ? Math.min(vh * 0.5, stageBox.bottom + 24) : vh * 0.5;
+    const pivot = window.innerWidth <= 900 ? Math.min(vh * 0.62, stageBox.bottom + 70) : vh * 0.5;
     let idx = 0;
     steps.forEach((st, i) => { if (st.getBoundingClientRect().top <= pivot) idx = i; });
     setActive(idx);
@@ -262,10 +269,15 @@ function setDepth(d){
   try { localStorage.setItem('prt-depth', d); } catch(e){}
 }
 /* diagram text size */
+function applyFSClass(){
+  // at the largest size the stage shows fewer labels so the ones left stay legible; the cards keep everything
+  document.body.dataset.fs = FS >= 1.4 ? 'xl' : FS > 1.1 ? 'l' : 'm';
+}
 function setFS(v, rebuild){
   FS = v;
   document.querySelectorAll('.textsize button').forEach(b => b.setAttribute('aria-pressed', String(parseFloat(b.dataset.fs) === v)));
   try { localStorage.setItem('prt-fs', String(v)); } catch(e){}
+  applyFSClass();
   if (rebuild !== false) buildAll();
 }
 
@@ -288,6 +300,7 @@ function init(opts){
     else if (matchMedia('(max-width: 700px)').matches) FS = 1.25;
     document.querySelectorAll('.textsize button').forEach(b => b.setAttribute('aria-pressed', String(parseFloat(b.dataset.fs) === FS)));
   } catch(e){}
+  applyFSClass();
 
   window.addEventListener('scroll', onScroll, {passive:true});
   window.addEventListener('resize', onScroll);
@@ -303,6 +316,21 @@ function init(opts){
     e.preventDefault();
     steps[target].scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'});
   });
+
+  // after-journey nav: sticks once reached (CSS) and highlights the section in view
+  const afterNav = document.getElementById('after-nav');
+  if (afterNav){
+    const links = Array.from(afterNav.querySelectorAll('a[href^="#"]'));
+    const targets = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+    const mark = () => {
+      const navH = afterNav.getBoundingClientRect().height + 8;
+      let cur = null;
+      targets.forEach(t => { if (t.getBoundingClientRect().top <= navH + 40) cur = t; });
+      links.forEach(a => { if (cur && a.getAttribute('href') === '#' + cur.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+    };
+    window.addEventListener('scroll', mark, {passive:true});
+    mark();
+  }
 
   buildAll();
   onScroll();

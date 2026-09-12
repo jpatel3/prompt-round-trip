@@ -67,7 +67,7 @@
           <button type="button" data-fs="1.25" aria-pressed="false" aria-label="Diagram text: larger">A<sup>+</sup></button>
           <button type="button" data-fs="1.5" aria-pressed="false" aria-label="Diagram text: largest">A<sup>++</sup></button>
         </span>
-        <span class="note">Diagram text size. Labels may crowd at the largest setting.</span>
+        <span class="note">Diagram text size. At A<sup>++</sup> the diagram shows fewer labels so they stay readable; the cards keep everything.</span>
       </div>
     </div>
   </div>
@@ -719,7 +719,7 @@
 <script>
 (function(){
 'use strict';
-const {el, text, label, lines, wrap, fmt, P, poly, cube, screenPlane, wire, pathThrough, frameTitle, Stream, tokenize, tokId, charsOf, disp, chipWidth, chip, chipRow, C, reduce} = PRT;
+const {el, text, label, lines, wrap, fmt, P, poly, cube, screenPlane, wire, pathThrough, frameTitle, bubble, Stream, tokenize, tokId, charsOf, disp, chipWidth, chip, chipRow, C, reduce} = PRT;
 
 /* ---------------- content ---------------- */
 const ANSWER = 'AI is changing what software jobs are more than how many there are. Routine code is increasingly generated, so the value shifts to framing problems, reviewing output, and owning systems end to end.';
@@ -751,16 +751,15 @@ function scene1(s){
   }
   const plane = screenPlane(s.g, ox, oy, 0, 0, 10, 170, 120);
   // chat bubble in plane coords (u 0..170, v 0..120)
-  el('rect', {x:10, y:14, width:150, height:64, rx:3, fill:C.ground, stroke:C.grid}, plane);
-  const pl = wrap(PROMPT, 30).slice(0, 4);
-  lines(plane, 18, 30, pl, {size:8.5, sans:true, lh:12, fill:C.ink});
-  const cursor = el('rect', {x:18 + Math.min(150, (pl[pl.length-1]||'').length*4.6), y:22 + (pl.length-1)*12, width:1.5, height:10, fill:C.ink}, plane);
-  el('rect', {x:10, y:92, width:150, height:18, rx:3, fill:C.paper, stroke:C.ink, 'stroke-width':0.8}, plane);
-  label(plane, 18, 104, 'send', {size:7.5, fill:C.muted});
-  el('rect', {x:132, y:96, width:22, height:10, fill:C.green}, plane);
+  const pb = bubble(plane, 10, 14, 150, PROMPT, {fill:C.ground, stroke:C.grid, size:8.5, lh:12, maxLines: PRT.FS > 1.1 ? 3 : 4, rx:3});
+  const cursor = el('rect', {x:18 + Math.min(138, pb.lastLine.length*4.6*PRT.FS), y:pb.bottom - 8 - 12*PRT.FS, width:1.5, height:10*PRT.FS, fill:C.ink}, plane);
+  const sy = Math.min(92, pb.bottom + 8);
+  el('rect', {x:10, y:sy, width:150, height:18, rx:3, fill:C.paper, stroke:C.ink, 'stroke-width':0.8}, plane);
+  label(plane, 18, sy + 12, 'send', {size:7.5, fill:C.muted});
+  el('rect', {x:132, y:sy + 4, width:22, height:10, fill:C.green}, plane);
   s.anims.push(t => cursor.setAttribute('opacity', Math.floor(t*2) % 2 ? 0 : 1));
   label(s.g, 40, 306, 'your device', {fill:C.ink});
-  label(s.g, 40, 320, 'the app you type into', {size:8.5});
+  label(s.g, 40, 320, 'the app you type into', {size:8.5, cls:'xl-hide'});
 
   // tokens
   label(s.g, 430, 96, 'tokens · ' + TOK.length + ' · with vocabulary ids', {fill:C.ink});
@@ -827,13 +826,13 @@ function scene2(s){
     pts.push(c.topCenter);
     const lx = n.ox - 4, ly = n.oy + (n.w + n.d)*0.5 + 16;
     label(s.g, lx, ly, n.name, {fill:C.ink, anchor:'middle'});
-    if (n.sub) label(s.g, lx, ly + 12, n.sub, {size:8.5, anchor:'middle'});
+    if (n.sub) label(s.g, lx, ly + 12, n.sub, {size:8.5, anchor:'middle', cls:'xl-hide'});
   });
   // fibre trunk label between ISP and edge
   const a = pts[2], b = pts[3];
   const mx = (a[0]+b[0])/2, my = (a[1]+b[1])/2;
   label(s.g, mx - 10, my - 48, 'fibre trunk', {fill:C.ink, anchor:'middle'});
-  label(s.g, mx - 10, my - 36, '≈ 200,000 km/s · 2/3 c', {size:8.5, anchor:'middle'});
+  label(s.g, mx - 10, my - 36, '≈ 200,000 km/s · 2/3 c', {size:8.5, anchor:'middle', cls:'xl-hide'});
   label(s.g, mx - 10, my - 24, '1,200 km ≈ 6 ms', {size:8.5, anchor:'middle', cls:'nerd-only'});
   const w = wire(s.g, pathThrough(pts), {sw:1.2});
   s.streams.push(new Stream(s.g, w, charsOf(TOK), {speed:70, n:20}));
@@ -882,8 +881,8 @@ function scene3(s){
   label(s.d, 36, 546, 'between decode steps, no waiting for the slowest', {size:8.5, cls:'nerd-only'});
   // scheduler
   const sch = cube(s.g, ox, oy, -120, 190, 0, 40, 40, 30, {top:C.paper});
-  label(s.g, sch.topCenter[0], sch.topCenter[1] + 62, 'scheduler', {fill:C.ink, anchor:'middle'});
-  label(s.g, sch.topCenter[0], sch.topCenter[1] + 74, 'load balancer', {size:8.5, anchor:'middle'});
+  label(s.g, sch.topCenter[0], sch.topCenter[1] + 72, 'scheduler', {fill:C.ink, anchor:'middle'});
+  label(s.g, sch.topCenter[0], sch.topCenter[1] + 84, 'load balancer', {size:8.5, anchor:'middle', cls:'xl-hide'});
   // incoming wires
   const inY = [232, 268, 330];
   const you = wire(s.g, pathThrough([[40, inY[1]], [sch.topCenter[0] - 40, inY[1]], sch.topCenter]), {stroke:C.greenInk, sw:1.2});
@@ -935,7 +934,7 @@ function scene4(s){
       const g = cube(s.g, ox, oy, it.x, it.y, 6, 42, 42, 10, {top:C.paper});
       gpuTops[it.i] = g.topCenter;
       text(s.g, g.topCenter[0], g.topCenter[1] + 2, 'GPU ' + it.i, {size:8, anchor:'middle', weight:500});
-      text(s.g, g.topCenter[0], g.topCenter[1] + 12, 'W ' + (it.i+1) + '/8', {size:7.5, anchor:'middle', fill:C.greenInk});
+      text(s.g, g.topCenter[0], g.topCenter[1] + 12, 'W ' + (it.i+1) + '/8', {size:7.5, anchor:'middle', fill:C.greenInk, cls:'xl-hide'});
     } else if (it.kind === 'hbm'){
       cube(s.g, ox, oy, it.x, it.y, 6, 10, 16, 24, {top:C.greenTint, left:'#E4F6EA', right:'#CDEAD8'});
     } else {
@@ -955,7 +954,7 @@ function scene4(s){
     p.c.setAttribute('cx', (p.a[0] + (p.b[0]-p.a[0])*u).toFixed(1));
     p.c.setAttribute('cy', (p.a[1] + (p.b[1]-p.a[1])*u).toFixed(1));
   }));
-  label(s.g, 400, 560, 'green stacks: HBM beside each GPU · black: NVLink switch', {size:8.5});
+  label(s.g, 400, 560, 'green stacks: HBM beside each GPU · black: NVLink switch', {size:8.5, cls:'xl-hide'});
   // stats left
   const sx = 36;
   label(s.g, sx, 96, 'one node', {fill:C.ink});
@@ -1003,7 +1002,7 @@ function scene5(s){
 
   // KV grid
   const rowsN = 12, n = TOK.length;
-  const gx = 72, gy = Math.max(300, row.bottom + 60), cw = Math.min(26, Math.floor(470 / n)), ch = 17;
+  const gx = Math.round(72 + (PRT.FS - 1) * 40), gy = Math.max(300, row.bottom + 60), cw = Math.min(26, Math.floor(440 / n)), ch = 17;
   label(s.d, 36, gy - 12, 'KV cache · one row per layer · one column per token', {fill:C.ink});
   label(el('g', {class:'plain-only'}, s.g), 36, gy - 12, 'sticky notes · one column per word', {fill:C.ink});
   const cells = [];
@@ -1127,11 +1126,11 @@ function scene6(s){
     // answer text
     while (ansG.firstChild) ansG.removeChild(ansG.firstChild);
     const str = ANS.slice(0, Math.min(k, A)).join('');
-    const ls = wrap(str, 36);
-    ls.forEach((l, i) => text(ansG, ax + 12, ay + 32 + i*15, l, {size:10.5, sans:true}));
+    const ls = wrap(str, Math.floor(36 / PRT.FS));
+    ls.forEach((l, i) => text(ansG, ax + 12, ay + 32 + i*15*PRT.FS, l, {size:10.5, sans:true}));
     if (k < A){
       const lastLine = ls[ls.length-1] || '';
-      el('rect', {x: ax + 12 + lastLine.length*5.35, y: ay + 22 + Math.max(0, ls.length-1)*15, width:5, height:12, fill:C.pink}, ansG);
+      el('rect', {x: ax + 12 + lastLine.length*5.35*PRT.FS, y: ay + 22 + Math.max(0, ls.length-1)*15*PRT.FS, width:5, height:12*PRT.FS, fill:C.pink}, ansG);
     }
     rate.textContent = k < A ? '≈ 70 tok/s' : Math.min(k,A) + ' tokens · ' + (A/70).toFixed(1) + ' s';
   }
@@ -1151,15 +1150,11 @@ function scene7(s){
   cube(s.g, ox, oy, 0, 0, 0, 300, 110, 10, {top:'#F8FAF8'});
   const plane = screenPlane(s.g, ox, oy, 0, 0, 10, 300, 180);
   // user bubble (right)
-  const ul = wrap(PROMPT, 34).slice(0, 3);
-  const ubH = 10 + ul.length*10.5;
-  el('rect', {x:120, y:12, width:170, height:ubH, rx:3, fill:C.greenTint, stroke:C.greenInk, 'stroke-width':0.6}, plane);
-  lines(plane, 128, 23, ul, {size:7.5, sans:true, lh:10.5});
-  // assistant bubble
-  const al = wrap(ANSWER, 58);
-  const abY = 12 + ubH + 10;
-  el('rect', {x:10, y:abY, width:280, height:16 + al.length*10.5, rx:3, fill:C.ground, stroke:C.grid}, plane);
-  lines(plane, 18, abY + 12, al, {size:7.5, sans:true, lh:10.5});
+  const ub = bubble(plane, 120, 12, 170, PROMPT, {fill:C.greenTint, stroke:C.greenInk, size:7.5, lh:10.5, maxLines:3, rx:3, sw:0.6});
+  // assistant bubble, capped to what fits on the screen
+  const abY = ub.bottom + 10;
+  const maxL = Math.max(2, Math.floor((176 - abY - 16) / (10.5 * PRT.FS)));
+  bubble(plane, 10, abY, 280, ANSWER, {fill:C.ground, stroke:C.grid, size:7.5, lh:10.5, maxLines:maxL, rx:3});
   label(s.g, 36, 250, 'your device', {fill:C.ink});
   label(s.g, 36, 262, 'rendering the stream', {size:8.5});
   // SSE feed
@@ -1216,7 +1211,7 @@ function scene8(s){
   const total = SYSTEM_TOK + n + A + f;
   const ox = 264, oy = 330;
   const slabs = [
-    {name:'system · profile · memories', tok:SYSTEM_TOK, top:C.paper},
+    {name: PRT.FS > 1.1 ? 'system + profile' : 'system · profile · memories', tok:SYSTEM_TOK, top:C.paper},
     {name:'user ① · turn 1', tok:n, top:C.greenTint},
     {name:'assistant ①', tok:A, top:C.paper},
     {name:'user ② · new', tok:f, top:C.pink}
@@ -1238,7 +1233,7 @@ function scene8(s){
   const rx = 440, bary = 150;
   const w = wire(s.g, pathThrough([start, [start[0] + 26, start[1]], [start[0] + 26, bary + 15], [rx - 4, bary + 15]]), {arrow:'arr'});
   s.streams.push(new Stream(s.g, w, charsOf(TOK).concat(charsOf(FUP)), {speed:60, n:12}));
-  const tl = label(s.g, 0, 0, 'whole transcript re-sent · ' + fmt(total) + ' tok', {size:8.5, anchor:'middle'});
+  const tl = label(s.g, 0, 0, 'whole transcript re-sent · ' + fmt(total) + ' tok', {size:8.5, anchor:'middle', cls:'xl-hide'});
   tl.setAttribute('transform', 'translate(' + (start[0] + 12) + ' ' + ((start[1] + bary + 15)/2) + ') rotate(-90)');
   // kv bar
   const bw = 330;
@@ -1274,7 +1269,7 @@ function scene8(s){
   // what persists
   const py = 420;
   label(s.g, rx, py, 'what persists after this call', {fill:C.ink});
-  const per = [['your app', 'the transcript', C.ink], ['server', 'cached prefix · ~5 min TTL · logs', C.greenInk], ['the model', 'nothing · training is offline, later', C.pinkInk]];
+  const per = PRT.FS > 1.1 ? [['your app', 'the transcript', C.ink], ['server', 'cached prefix · logs', C.greenInk], ['the model', 'nothing', C.pinkInk]] : [['your app', 'the transcript', C.ink], ['server', 'cached prefix · ~5 min TTL · logs', C.greenInk], ['the model', 'nothing · training is offline, later', C.pinkInk]];
   per.forEach((p, i) => {
     const y = py + 20 + i*18;
     el('rect', {x:rx, y:y - 8, width:8, height:8, fill:p[2]}, s.g);

@@ -134,11 +134,14 @@ body[data-depth="plain"] .scene .plain-only{opacity:1}
 .depth-nav li.more a::before{background:var(--pink);width:14px}
 
 /* ---------- after-journey navigation ---------- */
-.after-nav{border-top:1px solid var(--ink);background:var(--paper)}
+.after-nav{border-top:1px solid var(--ink);border-bottom:1px solid var(--grid);background:var(--paper);position:sticky;top:0;z-index:6}
 .after-nav .wrap{display:flex;align-items:center;gap:6px 22px;flex-wrap:wrap;padding-top:14px;padding-bottom:14px}
 .after-nav .eyebrow{margin-right:8px}
 .after-nav a{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-decoration:none;padding:6px 0;border-bottom:2px solid transparent}
 .after-nav a:hover, .after-nav a:focus-visible{border-bottom-color:var(--green);outline:none}
+.after-nav a[aria-current="true"]{border-bottom-color:var(--ink)}
+body.agent .after-nav a:hover, body.agent .after-nav a:focus-visible{border-bottom-color:var(--pink)}
+@media (max-width: 700px){.after-nav .eyebrow{display:none}.after-nav .wrap{flex-wrap:nowrap;overflow-x:auto;gap:18px;padding-top:8px;padding-bottom:8px}.after-nav a{white-space:nowrap}}
 
 /* ---------- the bill ---------- */
 .bill{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--ink);background:var(--paper)}
@@ -354,3 +357,8 @@ footer code{font-family:var(--mono);font-size:.86em;background:var(--paper);bord
 @media (prefers-reduced-motion: reduce){
   .scene{transition:none}
 }
+
+/* ---------- largest diagram text: fewer labels so the rest stays legible ---------- */
+body[data-fs="xl"] .scene .plain-hide{opacity:0}
+body[data-fs="xl"] .scene .xl-hide{opacity:0}
+body[data-fs="xl"] .scene .plain-only{opacity:1}

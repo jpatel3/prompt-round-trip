@@ -114,7 +114,7 @@ table.datamap .enc.plain{background:var(--pink-tint);color:var(--pink-ink)}
           <button type="button" data-fs="1.25" aria-pressed="false" aria-label="Diagram text: larger">A<sup>+</sup></button>
           <button type="button" data-fs="1.5" aria-pressed="false" aria-label="Diagram text: largest">A<sup>++</sup></button>
         </span>
-        <span class="note">Diagram text size.</span>
+        <span class="note">Diagram text size. At A<sup>++</sup> the diagram shows fewer labels so they stay readable; the cards keep everything.</span>
       </div>
     </div>
   </div>
@@ -504,7 +504,7 @@ function node(parent, ox, oy, size, name, sub, o){
   const c = cube(parent, ox, oy, 0, 0, 0, size, size, o.h || Math.round(size*0.55), o.green ? {top:C.green} : o.pink ? {top:C.pink} : o.dark ? {top:C.ink, left:'#2A332D', right:'#1A211C'} : {});
   const ly = oy + size + 14;
   label(parent, ox, ly, name, {fill:C.ink, anchor:'middle'});
-  if (sub) label(parent, ox, ly + 12, sub, {size:8.5, anchor:'middle'});
+  if (sub) label(parent, ox, ly + 12, sub, {size:8.5, anchor:'middle', cls:'xl-hide'});
   return c;
 }
 
@@ -515,8 +515,7 @@ function scene1(s){
     'The courier cannot read your letter. The office it is addressed to can, and that office is the assistant.');
   const ph = phone(s.g, 130, 470, 100, 190);
   chatHeader(ph.plane, ph.w, 'Assistant');
-  const ml = wrap(MSG, 22).slice(0, 4);
-  const b = bubble(ph.plane, 14, 26, ph.w - 22, ml, {fill:C.greenTint, stroke:C.greenInk, size:7.5, lh:10});
+  const b = bubble(ph.plane, 14, 26, ph.w - 22, MSG, {fill:C.greenTint, stroke:C.greenInk, size:7.5, lh:10, maxLines:4});
   text(ph.plane, ph.w - 10, b.bottom + 9, 'Delivered', {size:5.5, anchor:'end', fill:C.muted, sans:true});
   const dots = el('g', {}, ph.plane);
   el('rect', {x:8, y:b.bottom + 16, width:34, height:14, rx:4, fill:C.ground, stroke:C.grid, 'stroke-width':0.8}, dots);
@@ -533,10 +532,10 @@ function scene1(s){
   s.streams.push(new Stream(s.g, w1, charsOf(TOK), {speed:60, n:10}));
   s.streams.push(new Stream(s.g, w2, charsOf(TOK), {speed:60, n:9}));
   // locks and labels along the way
-  lock(s.g, 255, 360); label(s.g, 268, 364, 'encrypted to the platform', {size:8.5, fill:C.greenInk});
-  lock(s.g, 500, 268); label(s.g, 513, 272, 'TLS · platform → business API', {size:8.5, fill:C.greenInk});
+  lock(s.g, 255, 360); label(s.g, 268, 364, 'encrypted to the platform', {size:8.5, fill:C.greenInk, cls:'xl-hide'});
+  lock(s.g, 500, 268); label(s.g, 513, 272, 'TLS · platform → business API', {size:8.5, fill:C.greenInk, cls:'xl-hide'});
   label(s.g, 640, 200, 'end-to-end ends here', {anchor:'middle', fill:C.pinkInk});
-  label(s.g, 640, 212, 'the agent is the other end · it reads plaintext', {anchor:'middle', size:8.5, fill:C.pinkInk});
+  label(s.g, 640, 212, PRT.FS > 1.1 ? 'it reads plaintext' : 'the agent is the other end · it reads plaintext', {anchor:'middle', size:8.5, fill:C.pinkInk});
   // who can read
   const cx = 36, cy = 96;
   label(s.d, cx, cy, 'who can read this message', {fill:C.ink});
@@ -558,7 +557,7 @@ function scene2(s){
     'The clerk checks who the letter is from, pulls your folder from the cabinet, and clips the new letter to the front.');
   const inW = wire(s.g, pathThrough([[40, 300], [150, 300], [190, 322]]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
   s.streams.push(new Stream(s.g, inW, charsOf(TOK), {speed:60, n:7}));
-  label(s.g, 40, 288, 'webhook · HTTPS POST from the platform', {size:8.5, fill:C.greenInk});
+  label(s.g, 40, 288, PRT.FS > 1.1 ? 'webhook' : 'webhook · HTTPS POST from the platform', {size:8.5, fill:C.greenInk});
   const orch = node(s.g, 230, 320, 56, 'orchestrator', 'the program that runs the agent', {pink:true, h:30});
   // account card
   el('rect', {x:36, y:96, width:250, height:92, fill:C.paper, stroke:C.ink}, s.d);
@@ -567,8 +566,8 @@ function scene2(s){
   lines(s.d, 46, 134, ['from: +1 ••• 4471 → you', 'plan: personal · limits ok', 'connected: calendar · email · sentry', 'queue: 0.3 s'], {size:9.5, lh:14});
   wire(s.g, pathThrough([[160, 190], [160, 230], [230, 230], [230, 292]]), {dash:'3 4', stroke:C.muted, arrow:'arr'});
   // conversation store: stacked slabs
-  const ox = 470, oy = 300;
-  const slabs = [['audit log', 'what ran, when, who approved', C.paper], ['token vault', 'OAuth tokens for your accounts', C.ink], ['memories', '"prefers mornings" · 14 facts', C.paper], ['past turns', '212 messages · attachments', C.paper], ['this message', TOK.length + ' tokens · just arrived', C.greenTint]];
+  const ox = Math.round(470 - (PRT.FS - 1) * 110), oy = 300;
+  const slabs = [['audit log', PRT.FS > 1.1 ? 'what ran · who approved' : 'what ran, when, who approved', C.paper], ['token vault', PRT.FS > 1.1 ? 'OAuth tokens' : 'OAuth tokens for your accounts', C.ink], ['memories', '"prefers mornings" · 14 facts', C.paper], ['past turns', '212 messages · attachments', C.paper], ['this message', TOK.length + ' tokens · just arrived', C.greenTint]];
   slabs.forEach((sl, i) => {
     const z = i*22;
     cube(s.g, ox, oy, 0, 0, z, 150, 90, 14, {top:sl[2], left: sl[2] === C.ink ? '#2A332D' : undefined, right: sl[2] === C.ink ? '#1A211C' : undefined});
@@ -584,7 +583,7 @@ function scene2(s){
   label(s.d, 360, 540, 'postgres + object store · cloud KMS keys · SOC 2 scope', {size:8, cls:'nerd-only'});
   const toStore = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0] + 60, orch.topCenter[1] - 30], [ox - 90, 230], [ox - 30, 230], P(ox, oy, 0, 45, 5*22 + 14)]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink'});
   s.streams.push(new Stream(s.g, toStore, charsOf(TOK), {speed:55, n:10, fill:C.pinkInk}));
-  label(s.g, 330, 212, 'load your folder · append the message', {size:8.5, fill:C.pinkInk});
+  label(s.g, 330, 212, 'load your folder · append the message', {size:8.5, fill:C.pinkInk, cls:'xl-hide'});
 }
 
 /* 3 · context assembly */
@@ -631,7 +630,7 @@ function scene3(s){
     text(s.d, cx + 350, y, fmt(r[2]) + ' tok', {size:9.5, anchor:'end', fill:C.muted});
   });
   el('rect', {x:cx + 3, y:cy + 40 + 3*22 - 12, width:4, height:62, fill:C.pink}, s.g);
-  label(s.g, cx + 10, cy + 180, 'pink: copies of your data, now inside the request', {size:8.5, fill:C.pinkInk});
+  label(s.g, cx + 10, cy + 180, PRT.FS > 1.1 ? 'pink: copies of your data' : 'pink: copies of your data, now inside the request', {size:8.5, fill:C.pinkInk});
   const toCard = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0], cy - 6]]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink'});
   s.streams.push(new Stream(s.g, toCard, charsOf(TOK), {speed:50, n:4, fill:C.pinkInk}));
   const pg = el('g', {class:'plain-only'}, s.g);
@@ -661,7 +660,7 @@ function scene4(s){
   names.forEach((n, i) => {
     const ox = 190 + i*60, oy = 440;
     const c = cube(s.g, ox, oy, 0, 0, 0, 22, 22, 14, i === 4 || i === 5 ? {top:C.green} : {});
-    label(s.g, ox, oy + 42, n, {anchor:'middle', size:7.5});
+    label(s.g, ox, oy + 42, n, {anchor:'middle', size:7.5, cls:'xl-hide'});
     if (i < 7) el('line', {x1:ox + 16, y1:c.topCenter[1] + 8, x2:ox + 44, y2:c.topCenter[1] + 8, stroke:C.grid}, s.g);
   });
   label(s.d, 400, 500, 'streaming usually off inside a loop: the orchestrator needs the whole tool call before acting', {anchor:'middle', size:8, cls:'nerd-only'});
@@ -694,8 +693,8 @@ function scene5(s){
   const down = wire(s.g, pathThrough([[model.topCenter[0] + 6, model.topCenter[1] + 18], [model.topCenter[0] - 40, model.topCenter[1] + 60], [orch.topCenter[0] + 60, orch.topCenter[1] + 14], [orch.topCenter[0] + 10, orch.topCenter[1] + 6]]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink', dash:'4 3'});
   s.streams.push(new Stream(s.g, up, 'request+results'.split(''), {speed:60, n:9}));
   s.streams.push(new Stream(s.g, down, 'toolcall'.split(''), {speed:60, n:6, fill:C.pinkInk}));
-  label(s.g, 330, 216, 'request, bigger each time', {fill:C.greenInk});
-  label(s.g, 340, 352, 'tool call', {fill:C.pinkInk});
+  label(s.g, 330, 216, 'request, bigger each time', {fill:C.greenInk, cls:'xl-hide'});
+  label(s.g, 340, 352, 'tool call', {fill:C.pinkInk, cls:'xl-hide'});
   const toolWires = tools.map(t => wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0], t.topCenter[1] - 40], [t.topCenter[0], t.topCenter[1] - 40], t.topCenter]), {stroke:C.grid, sw:1}));
   // loop status panel
   const px = 560, py = 96;
@@ -707,7 +706,7 @@ function scene5(s){
   const ctxG = el('g', {}, s.g);
   label(s.g, px + 10, py + 92, 'the model asks for', {size:8.5, fill:C.pinkInk});
   const callG = el('g', {}, s.g);
-  label(s.g, px + 10, py + 150, 'the orchestrator returns', {size:8.5});
+  label(s.g, px + 10, py + 150 + (PRT.FS - 1) * 56, 'the orchestrator returns', {size:8.5});
   const resG = el('g', {}, s.g);
   label(s.d, px + 10, py + 214, 'capped at 10–30 loops · errors are appended and retried', {size:7.5, cls:'nerd-only'});
   // context growth bar (bottom)
@@ -717,9 +716,10 @@ function scene5(s){
   const bars = [];
   for (let i = 0; i < 4; i++){
     const y = by + 14 + i*22;
+    const off = Math.round(42 * PRT.FS);
     label(s.g, bx, y + 8, 'call ' + (i+1), {size:8});
-    el('rect', {x:bx + 42, y:y, width:bw - 42, height:12, fill:C.paper, stroke:C.grid}, s.g);
-    const r = el('rect', {x:bx + 42, y:y, width:((bw - 42) * ctxTokens(i) / maxCtx).toFixed(1), height:12, fill:C.grid}, s.g);
+    el('rect', {x:bx + off, y:y, width:bw - off, height:12, fill:C.paper, stroke:C.grid}, s.g);
+    const r = el('rect', {x:bx + off, y:y, width:((bw - off) * ctxTokens(i) / maxCtx).toFixed(1), height:12, fill:C.grid}, s.g);
     text(s.g, bx + bw + 6, y + 9.5, fmt(ctxTokens(i)) + ' tok', {size:8.5, fill:C.muted});
     bars.push(r);
   }
@@ -736,9 +736,9 @@ function scene5(s){
     while (ctxG.firstChild) ctxG.removeChild(ctxG.firstChild);
     text(ctxG, px + 10, py + 66, fmt(ctxTokens(k)) + ' tokens', {size:18, weight:500, sans:true});
     while (callG.firstChild) callG.removeChild(callG.firstChild);
-    lines(callG, px + 10, py + 108, wrap(LOOPS[k].call, 30).slice(0, 3), {size:8.5, lh:12, fill:C.pinkInk});
+    lines(callG, px + 10, py + 108, wrap(LOOPS[k].call, Math.floor(30 / PRT.FS)).slice(0, 3), {size:8.5, lh:12, fill:C.pinkInk});
     while (resG.firstChild) resG.removeChild(resG.firstChild);
-    lines(resG, px + 10, py + 166, wrap(LOOPS[k].result, 30).slice(0, 3), {size:8.5, lh:12});
+    lines(resG, px + 10, py + 166 + (PRT.FS - 1) * 56, wrap(LOOPS[k].result, Math.floor(30 / PRT.FS)).slice(0, 2), {size:8.5, lh:12});
     tools.forEach((tn, i) => tn.querySelectorAll('polygon')[tn.querySelectorAll('polygon').length - 1].setAttribute('fill', LOOPS[k].tool === ['Calendar','Email','You'][i] ? C.pink : C.paper));
     toolWires.forEach((w, i) => w.setAttribute('stroke', LOOPS[k].tool === ['Calendar','Email','You'][i] ? C.pinkInk : C.grid));
   });
@@ -751,7 +751,7 @@ function scene6(s){
     'Before posting the letter, the clerk knocks: "Friday at ten, and I\'ll tell her. Yes?" Nothing moves until you nod.');
   const ph = phone(s.g, 150, 470, 110, 200);
   chatHeader(ph.plane, ph.w, 'Assistant');
-  const b1 = bubble(ph.plane, 8, 24, ph.w - 16, wrap('Move Thu 3 pm with Priya → Fri 10:00 and email her the new time?', 26), {fill:C.pinkTint, stroke:C.pinkInk, size:7, lh:9.5});
+  const b1 = bubble(ph.plane, 8, 24, ph.w - 16, 'Move Thu 3 pm with Priya → Fri 10:00 and email her the new time?', {fill:C.pinkTint, stroke:C.pinkInk, size:7, lh:9.5, maxLines:6});
   el('rect', {x:8, y:b1.bottom + 6, width:(ph.w - 20)/2, height:14, rx:3, fill:C.ink}, ph.plane);
   text(ph.plane, 8 + (ph.w - 20)/4, b1.bottom + 16, 'Approve', {size:6.5, anchor:'middle', fill:C.paper, sans:true, weight:500});
   el('rect', {x:12 + (ph.w - 20)/2, y:b1.bottom + 6, width:(ph.w - 20)/2, height:14, rx:3, fill:C.paper, stroke:C.ink, 'stroke-width':0.8}, ph.plane);
@@ -762,11 +762,11 @@ function scene6(s){
   const gate = el('g', {}, s.g);
   el('rect', {x:440, y:150, width:60, height:28, fill:C.paper, stroke:C.ink}, gate);
   text(gate, 470, 168, 'GATE', {size:10, anchor:'middle', weight:500});
-  const waitT = text(s.g, 470, 200, 'waiting…', {size:10, anchor:'middle', fill:C.pinkInk});
+  const waitT = text(s.g, 470, 200 + (PRT.FS - 1) * 30, 'waiting…', {size:10, anchor:'middle', fill:C.pinkInk});
   wire(s.g, pathThrough([orch.topCenter, [470, 180]]), {stroke:C.pinkInk, sw:1.2, dash:'4 3'});
   const ask = wire(s.g, pathThrough([[440, 164], [330, 164], [ph.top[0] + 30, ph.top[1] - 20], ph.top]), {stroke:C.pinkInk, sw:1.2, arrow:'arr-pink'});
   s.streams.push(new Stream(s.g, ask, 'Fri10:00?'.split(''), {speed:55, n:7, fill:C.pinkInk}));
-  label(s.g, 330, 182, 'the proposed action, sent to you', {fill:C.pinkInk});
+  label(s.g, 330, 182, 'the proposed action, sent to you', {fill:C.pinkInk, cls:'xl-hide'});
   s.anims.push(t => waitT.textContent = 'waiting for you · ' + Math.floor(t % 60) + ' s · nothing runs');
   // two paths
   const px = 560, py = 400;
@@ -801,12 +801,12 @@ function scene7(s){
   // phone with reply
   const ph = phone(s.g, 120, 470, 100, 190);
   chatHeader(ph.plane, ph.w, 'Assistant');
-  const b0 = bubble(ph.plane, 14, 24, ph.w - 22, wrap(MSG, 22).slice(0, 3), {fill:C.greenTint, stroke:C.greenInk, size:6.5, lh:9});
-  const b1 = bubble(ph.plane, 6, b0.bottom + 6, ph.w - 22, wrap(REPLY, 22), {fill:C.pinkTint, stroke:C.pinkInk, size:6.5, lh:9});
+  const b0 = bubble(ph.plane, 14, 24, ph.w - 22, MSG, {fill:C.greenTint, stroke:C.greenInk, size:6.5, lh:9, maxLines:3});
+  const b1 = bubble(ph.plane, 6, b0.bottom + 6, ph.w - 22, REPLY, {fill:C.pinkTint, stroke:C.pinkInk, size:6.5, lh:9, maxLines: PRT.FS > 1.1 ? 4 : 6});
   label(s.g, 120, 520, 'your phone · 14:04', {anchor:'middle', fill:C.ink});
   const back = wire(s.g, pathThrough([[orch.topCenter[0] - 10, orch.topCenter[1] + 10], [200, 330], [ph.top[0] + 20, ph.top[1] - 16], ph.top]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink', dash:'4 3'});
   s.streams.push(new Stream(s.g, back, 'Done.MovedtoFri10'.split(''), {speed:50, n:8, fill:C.pinkInk}));
-  label(s.g, 200, 318, 'reply · back through the platform', {size:8.5, fill:C.pinkInk});
+  label(s.g, 200, 318, 'reply · back through the platform', {size:8.5, fill:C.pinkInk, cls:'xl-hide'});
   // ledger
   const lx = 440, ly = 336;
   el('rect', {x:lx, y:ly, width:326, height:200, fill:C.paper, stroke:C.ink}, s.d);
@@ -842,7 +842,7 @@ function scene8(s){
   const model = node(s.g, 540, 180, 44, 'model API', '2 calls · ' + fmt(ctxTokens(0)) + ' + ' + fmt(ctxTokens(1)) + ' tok', {green:true});
   const w1 = wire(s.g, pathThrough([sentry.topCenter, [sentry.topCenter[0] + 40, sentry.topCenter[1] - 40], [orch.topCenter[0] - 40, orch.topCenter[1] + 10], orch.topCenter]), {stroke:C.ink, sw:1.2, arrow:'arr'});
   s.streams.push(new Stream(s.g, w1, 'ALERT 500 /api/pay 12'.split('').filter(c=>c!==' '), {speed:60, n:8, fill:C.ink}));
-  label(s.g, 130, 250, 'webhook · no human sent this', {anchor:'middle', size:8.5});
+  label(s.g, 130, 250, PRT.FS > 1.1 ? 'webhook · not from you' : 'webhook · no human sent this', {anchor:'middle', size:8.5});
   const w2 = wire(s.g, pathThrough([orch.topCenter, [orch.topCenter[0] + 40, orch.topCenter[1] - 50], [model.topCenter[0] - 50, model.topCenter[1] + 10], model.topCenter]), {stroke:C.greenInk, sw:1.2, arrow:'arr-green'});
   s.streams.push(new Stream(s.g, w2, 'logs+context'.split(''), {speed:60, n:7}));
   const w3 = wire(s.g, pathThrough([[model.topCenter[0] + 4, model.topCenter[1] + 18], [model.topCenter[0] - 30, model.topCenter[1] + 50], [orch.topCenter[0] + 50, orch.topCenter[1] + 6], [orch.topCenter[0] + 10, orch.topCenter[1] + 4]]), {stroke:C.pinkInk, sw:1.1, dash:'4 3', arrow:'arr-pink'});
@@ -851,11 +851,11 @@ function scene8(s){
   const ph = phone(s.g, 660, 500, 100, 190);
   el('rect', {x:0, y:0, width:ph.w, height:ph.h, fill:'#1A211C'}, ph.plane);
   text(ph.plane, ph.w/2, 30, '3:12', {size:16, anchor:'middle', fill:C.paper, sans:true, weight:500});
-  bubble(ph.plane, 6, 44, ph.w - 12, ['Assistant', '/api/pay is failing (12 events).', 'Likely the 02:50 deploy.', 'Roll back? Reply Y.'], {fill:C.paper, stroke:C.grid, size:6.5, lh:9});
+  bubble(ph.plane, 6, 44, ph.w - 12, 'Assistant: /api/pay is failing (12 events). Likely the 02:50 deploy. Roll back? Reply Y.', {fill:C.paper, stroke:C.grid, size:6.5, lh:9, maxLines:7});
   label(s.g, 660, 540, 'your phone · asleep', {anchor:'middle', fill:C.ink});
   const push = wire(s.g, pathThrough([[orch.topCenter[0] + 20, orch.topCenter[1] + 26], [orch.topCenter[0] + 20, 400], [ph.top[0] - 60, 400], [ph.top[0] - 20, ph.top[1] - 10], ph.top]), {stroke:C.pinkInk, sw:1.1, arrow:'arr-pink'});
   s.streams.push(new Stream(s.g, push, 'Rollback?'.split(''), {speed:55, n:8, fill:C.pinkInk}));
-  label(s.g, 430, 392, 'pushed to you · gated: waits for Y', {size:8.5, fill:C.pinkInk});
+  label(s.g, 430, 392, PRT.FS > 1.1 ? 'pushed to you · gated' : 'pushed to you · gated: waits for Y', {size:8.5, fill:C.pinkInk});
   // standing permissions
   const px = 36, py = 378;
   el('rect', {x:px, y:py, width:330, height:170, fill:C.paper, stroke:C.ink}, s.d);
